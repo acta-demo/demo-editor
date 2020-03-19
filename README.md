@@ -1,2 +1,2 @@
-# demo-editor
+# Demo editor
 editor
