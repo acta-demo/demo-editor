@@ -173,10 +173,6 @@ export default class MultirootEditorUI extends EditorUI {
 			const editingRoot = editingView.document.getRoot(editable.name);
 			const sourceElement = this.getEditableElement(editable.name);
 
-			//console.log('_initPlaceholder editable:', editable);
-			//console.log('_initPlaceholder editingRoot:', editingRoot);
-			//console.log('_initPlaceholder sourceElement:', sourceElement);
-
 			const placeholderText = editor.config.get('placeholder')[editable.name] ||
 				sourceElement && sourceElement.tagName.toLowerCase() === 'textarea' && sourceElement.getAttribute('placeholder');
 

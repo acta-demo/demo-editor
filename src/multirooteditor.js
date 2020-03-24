@@ -45,7 +45,6 @@ import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
  */
 export default class MultirootEditor extends Editor {
 
-
 	/**
      * Creates an instance of the multi-root editor.
      *
