@@ -30,6 +30,7 @@ import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefrom
 import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 
+import StandardWord from './standardword/standardword';
 
 /**
  * The multi-root editor implementation. It provides inline editables and a single toolbar.
@@ -152,13 +153,14 @@ MultirootEditor.builtinPlugins = [
 	Paragraph,
 	PasteFromOffice,
 	Table,
-	TableToolbar
+	TableToolbar,
+	StandardWord
 ];
 
 // Editor configuration.
 MultirootEditor.defaultConfig = {
 	plugins: [Essentials, Paragraph, Heading, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption,
-		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage],
+		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage, StandardWord],
 	toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'imageUpload', 'blockQuote',
 		'insertTable', 'mediaEmbed', 'undo', 'redo'],
 	image: {
