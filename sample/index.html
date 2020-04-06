@@ -9,32 +9,66 @@
 			margin: 20px auto;
 		}
 	</style>
+	<script src="../build/ckeditor.js"></script>
 </head>
 <body>
 
 <h1>CKEditor 5 – classic editor build – development sample</h1>
 
-<div id="editor">
-	<h2>Sample</h2>
+<div id="toolbar"></div>
 
-	<p>This is an instance of the <a href="https://ckeditor.com/docs/ckeditor5/latest/builds/guides/overview.html#classic-editor">classic editor build</a>.</p>
+<header id="header">
+    <h2>Gone traveling</h2>
+    <h3>Monthly travel news and inspiration</h3>
+</header>
 
-	<figure class="image">
-		<img src="../tests/manual/sample.jpg" alt="Autumn fields" />
-	</figure>
+<div id="content">
+    <h3>Destination of the Month</h3>
 
-	<p>You can use this sample to validate whether your <a href="https://ckeditor.com/docs/ckeditor5/latest/builds/guides/development/custom-builds.html">custom build</a> works fine.</p>
+    <h4>Valletta</h4>
+
+    <figure class="image image-style-align-right">
+        <img alt="Picture of a sunlit facade of a Maltan building." src="../../../../assets/img/malta.jpg">
+        <figcaption>It's siesta time in Valletta.</figcaption>
+    </figure>
+
+    <p>The capital city of <a href="https://en.wikipedia.org/wiki/Malta" target="_blank" rel="external">Malta</a> is the top destination this summer. It’s home to a cutting-edge contemporary architecture, baroque masterpieces, delicious local cuisine and at least 8 months of sun. It’s also a top destination for filmmakers, so you can take a tour through locations familiar to you from Game of Thrones, Gladiator, Troy and many more.</p>
 </div>
 
-<script src="../build/ckeditor.js"></script>
+<div class="demo-row">
+    <div class="demo-row__half">
+        <div id="footer-left">
+            <h3>The three greatest things you learn from traveling</h3>
+            <p><a href="#">Find out more</a></p>
+        </div>
+    </div>
+
+    <div class="demo-row__half">
+        <div id="footer-right">
+            <h3>Walking the capitals of Europe: Warsaw</h3>
+            <p><a href="#">Find out more</a></p>
+        </div>
+    </div>
+</div>
+
 <script>
-	ClassicEditor.create( document.querySelector( '#editor' ) )
-		.then( editor => {
-			window.editor = editor;
-		} )
-		.catch( error => {
-			console.error( 'There was a problem initializing the editor.', error );
-		} );
+	MultirootEditor
+    .create( {
+        header: document.querySelector( '#header' ),
+        content: document.querySelector( '#content' ),
+        footerleft: document.querySelector( '#footer-left' ),
+        footerright: document.querySelector( '#footer-right' )
+    }, {
+        
+    } )
+    .then( newEditor => {
+        document.querySelector( '#toolbar' ).appendChild( newEditor.ui.view.toolbar.element );
+
+        window.editor = newEditor;
+    } )
+    .catch( err => {
+        console.error( err.stack );
+    } );
 </script>
 
 </body>
