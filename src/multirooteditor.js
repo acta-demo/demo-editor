@@ -31,6 +31,7 @@ import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 
 import StandardWord from './standardword/standardword';
+import ViewModeChange from './viewmodechange/viewmodechange';
 
 /**
  * The multi-root editor implementation. It provides inline editables and a single toolbar.
@@ -154,15 +155,16 @@ MultirootEditor.builtinPlugins = [
 	PasteFromOffice,
 	Table,
 	TableToolbar,
-	StandardWord
+	StandardWord,
+	ViewModeChange
 ];
 
 // Editor configuration.
 MultirootEditor.defaultConfig = {
 	plugins: [Essentials, Paragraph, Heading, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption,
-		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage, StandardWord],
+		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage, StandardWord, ViewModeChange],
 	toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'imageUpload', 'blockQuote',
-		'insertTable', 'mediaEmbed', 'undo', 'redo'],
+		'insertTable', 'mediaEmbed', 'undo', 'redo', 'viewmodechange'],
 	image: {
 		toolbar: ['imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
 		styles: ['full', 'alignLeft', 'alignRight']

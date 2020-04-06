@@ -14,7 +14,7 @@ export default class StandardWordCommand extends Command {
 
 			// ... and insert it into the document.
 			editor.model.insertContent(stw);
-			console.log('standard word:', stw);
+
 			// Put the selection on the inserted element.
 			writer.setSelection(stw, 'on');
 		});

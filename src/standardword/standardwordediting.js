@@ -13,6 +13,7 @@ import './css/standardword.css';
 export default class StandardWordEditing extends Plugin {
 
 
+
 	static get viewmode() {
 		return (typeof this._viewmode !== 'undefined') ? this._viewmode : 'infoview';
 	}
@@ -59,7 +60,7 @@ export default class StandardWordEditing extends Plugin {
 			isObject: true,
 
 			// The str can have many types, like date, name, surname, etc:
-			allowAttributes: ['data-id', 'data-content']
+			allowAttributes: ['data-id', 'data-content', 'data-type', 'data-viewmode']
 		});
 
 	}
@@ -70,14 +71,17 @@ export default class StandardWordEditing extends Plugin {
 		conversion.for('upcast').elementToElement({
 			view: {
 				name: 'span',
-				classes: ['standardword']
+				'data-type': ['str']
 			},
 			model: (viewElement, modelWriter) => {
 
 				const variableid = viewElement.getAttribute('data-id');
 				const _text = viewElement.getChild(0);
 
-				const modelElement = modelWriter.createElement('str', { 'data-id': variableid, 'data-content': Util.encodeHTML(_text.data) });
+				const modelElement = modelWriter.createElement('str', {
+					'data-id': variableid,
+					'data-content': Util.encodeHTML(_text.data)
+				});
 
 				return modelElement;
 			}
@@ -99,17 +103,29 @@ export default class StandardWordEditing extends Plugin {
 		});
 
 		function createStrEditingView(modelItem, viewWriter) {
-
 			const variableId = modelItem.getAttribute('data-id');
 			const textcontent = modelItem.getAttribute('data-content');
-
-			const strView = viewWriter.createContainerElement('span', {
-				class: 'standardword', 'data-id': variableId
-			});
-
-			// Insert the str (as a text).
-			const innerText = viewWriter.createText('{wrd_str:' + variableId + ':' + Util.decodeHTML(textcontent) + '}');
-			viewWriter.insert(viewWriter.createPositionAt(strView, 0), innerText);
+			let strView;
+			if (StandardWordEditing.viewmode === 'infoview') {
+				strView = viewWriter.createContainerElement('span', {
+					class: 'standardword', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'str'
+				});
+				const innerText = viewWriter.createText('{wrd_str:' + variableId + ':' + Util.decodeHTML(textcontent) + '}');
+				viewWriter.insert(viewWriter.createPositionAt(strView, 0), innerText);
+			} else if (StandardWordEditing.viewmode === 'coloredview') {
+				strView = viewWriter.createContainerElement('span', {
+					class: 'standardword', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'str'
+				});
+				const innerText = viewWriter.createText( Util.decodeHTML(textcontent) );
+				viewWriter.insert(viewWriter.createPositionAt(strView, 0), innerText);
+			} else if (StandardWordEditing.viewmode === 'simpleview') {
+				strView = viewWriter.createContainerElement('span', {
+					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'str'
+				});
+				const innerText = viewWriter.createText( Util.decodeHTML(textcontent) );
+				viewWriter.insert(viewWriter.createPositionAt(strView, 0), innerText);
+			}
+			
 			return strView;
 		}
 
@@ -119,12 +135,13 @@ export default class StandardWordEditing extends Plugin {
 			const textcontent = modelItem.getAttribute('data-content');
 
 			const strView = viewWriter.createContainerElement('span', {
-				class: 'standardword', 'data-id': variableId
+				class: 'standardword', 'data-id': variableId, 'data-type': 'str'
 			});
 
 			// Insert the str (as a text).
-			const innerText = viewWriter.createText( Util.decodeHTML(textcontent) );
+			const innerText = viewWriter.createText(Util.decodeHTML(textcontent));
 			viewWriter.insert(viewWriter.createPositionAt(strView, 0), innerText);
+
 			return strView;
 		}
 

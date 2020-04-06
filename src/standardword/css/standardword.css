@@ -1,3 +1,7 @@
 .standardword {
 	color: red;
 }
+
+.removetextcolor {
+	text-decoration: none;
+}
