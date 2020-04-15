@@ -1,0 +1,22 @@
+.snippet {
+	background-color: yellow;
+	display: inline-block;
+}
+
+.snippet_simpleview {
+	display: inline-block;
+}
+
+.snippet_info {
+	background-color: yellow;
+	margin:0;
+	padding:0;
+}
+
+.snippet::before {
+	content: attr(data-before);
+}
+
+.snippet::after {
+	content: attr(data-after);
+}

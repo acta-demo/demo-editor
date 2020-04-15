@@ -31,6 +31,7 @@ import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 
 import StandardWord from './standardword/standardword';
+import Snippet from './snippet/snippet';
 import ViewModeChange from './viewmodechange/viewmodechange';
 
 /**
@@ -156,13 +157,14 @@ MultirootEditor.builtinPlugins = [
 	Table,
 	TableToolbar,
 	StandardWord,
+	Snippet,
 	ViewModeChange
 ];
 
 // Editor configuration.
 MultirootEditor.defaultConfig = {
 	plugins: [Essentials, Paragraph, Heading, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption,
-		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage, StandardWord, ViewModeChange],
+		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage, StandardWord, Snippet, ViewModeChange],
 	toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'imageUpload', 'blockQuote',
 		'insertTable', 'mediaEmbed', 'undo', 'redo', 'viewmodechange'],
 	image: {

@@ -51,7 +51,7 @@ export default class StandardWordEditing extends Plugin {
 
 		schema.register('str', {
 			// Allow wherever text is allowed:
-			allowWhere: '$text',
+			allowWhere: ['$text' , 'snp'],
 
 			// The str will act as an inline node:
 			isInline: true,
@@ -71,7 +71,7 @@ export default class StandardWordEditing extends Plugin {
 		conversion.for('upcast').elementToElement({
 			view: {
 				name: 'span',
-				'data-type': ['str']
+				classes: 'standardword'
 			},
 			model: (viewElement, modelWriter) => {
 
@@ -80,7 +80,9 @@ export default class StandardWordEditing extends Plugin {
 
 				const modelElement = modelWriter.createElement('str', {
 					'data-id': variableid,
-					'data-content': Util.encodeHTML(_text.data)
+					'data-content': Util.encodeHTML(_text.data),
+					'data-viewmode': StandardWordEditing.viewmode,
+					'data-type': 'str'
 				});
 
 				return modelElement;
@@ -90,6 +92,7 @@ export default class StandardWordEditing extends Plugin {
 		conversion.for('editingDowncast').elementToElement({
 			model: 'str',
 			view: (modelItem, viewWriter) => {
+				console.log('#### elementToElement createStrEditingView CALLED!');
 				const widgetElement = createStrEditingView(modelItem, viewWriter);
 
 				// Enable widget handling on a placeholder element inside the editing view.
@@ -102,7 +105,25 @@ export default class StandardWordEditing extends Plugin {
 			view: createStrDataView
 		});
 
+		/*
+		// Keep this if we want to change model on viewmode change. We need to check also the undo functionality with toolbar update
+		conversion.for('editingDowncast').add(dispatcher => dispatcher.on('attribute:data-viewmode', (evt, data, conversionApi) => {
+			console.log('#### attribute:data-viewmode CALLED!');
+			console.log('#### attribute:data-viewmode data:', data);
+			console.log('#### attribute:data-viewmode evt:', evt);
+			const myModelElement = data.item;
+			console.log('#### attribute:data-viewmode myModelElement:', myModelElement);
+			// Mark element as consumed by conversion.
+			conversionApi.consumable.consume(data.item, evt.name);
+
+			// Get mapped view element to update.
+			const viewElement = conversionApi.mapper.toViewElement(myModelElement);
+			console.log('#### attribute:data-viewmode viewElement:', viewElement);
+		}));
+		*/
+
 		function createStrEditingView(modelItem, viewWriter) {
+
 			const variableId = modelItem.getAttribute('data-id');
 			const textcontent = modelItem.getAttribute('data-content');
 			let strView;
@@ -110,7 +131,7 @@ export default class StandardWordEditing extends Plugin {
 				strView = viewWriter.createContainerElement('span', {
 					class: 'standardword', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'str'
 				});
-				const innerText = viewWriter.createText('{wrd_str:' + variableId + ':' + Util.decodeHTML(textcontent) + '}');
+				const innerText = viewWriter.createText('{str:' + variableId + ':' + Util.decodeHTML(textcontent) + '}');
 				viewWriter.insert(viewWriter.createPositionAt(strView, 0), innerText);
 			} else if (StandardWordEditing.viewmode === 'coloredview') {
 				strView = viewWriter.createContainerElement('span', {
