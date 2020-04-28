@@ -51,7 +51,7 @@ export default class StandardWordEditing extends Plugin {
 
 		schema.register('str', {
 			// Allow wherever text is allowed:
-			allowWhere: ['$text' , 'snp'],
+			allowWhere: ['$text', 'snp'],
 
 			// The str will act as an inline node:
 			isInline: true,
@@ -146,7 +146,7 @@ export default class StandardWordEditing extends Plugin {
 				const innerText = viewWriter.createText( Util.decodeHTML(textcontent) );
 				viewWriter.insert(viewWriter.createPositionAt(strView, 0), innerText);
 			}
-			
+			console.log('#### createStrEditingView strView:', strView);
 			return strView;
 		}
 

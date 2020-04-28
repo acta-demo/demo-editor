@@ -32,7 +32,10 @@ import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 
 import StandardWord from './standardword/standardword';
 import Snippet from './snippet/snippet';
+import Variable from './variable/variable';
+import ListOfSpeakers from './listofspeakers/listofspeakers';
 import ViewModeChange from './viewmodechange/viewmodechange';
+import MouseRightClickObserver from './mouserightclickobserver/mouserightclickobserver'
 
 /**
  * The multi-root editor implementation. It provides inline editables and a single toolbar.
@@ -69,6 +72,7 @@ export default class MultirootEditor extends Editor {
 		}
 
 		this.ui = new MultirootEditorUI(this, new MultirootEditorUIView(this.locale, this.editing.view, sourceElements));
+		this.editing.view.addObserver(MouseRightClickObserver);
 	}
 
 	/**
@@ -158,15 +162,17 @@ MultirootEditor.builtinPlugins = [
 	TableToolbar,
 	StandardWord,
 	Snippet,
+	Variable,
+	ListOfSpeakers,
 	ViewModeChange
 ];
 
 // Editor configuration.
 MultirootEditor.defaultConfig = {
 	plugins: [Essentials, Paragraph, Heading, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption,
-		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage, StandardWord, Snippet, ViewModeChange],
+		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage, StandardWord, Snippet, Variable, ViewModeChange, ListOfSpeakers],
 	toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'imageUpload', 'blockQuote',
-		'insertTable', 'mediaEmbed', 'undo', 'redo', 'viewmodechange'],
+		'insertTable', 'mediaEmbed', 'undo', 'redo', 'viewmodechange', 'variable', 'lsp'],
 	image: {
 		toolbar: ['imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
 		styles: ['full', 'alignLeft', 'alignRight']

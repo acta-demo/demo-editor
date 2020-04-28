@@ -94,5 +94,8 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
+  },
+  "dependencies": {
+    "date-fns": "^2.12.0"
   }
 }
