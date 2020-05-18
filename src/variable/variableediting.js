@@ -223,7 +223,7 @@ export default class VariableEditing extends Plugin {
 				const minutes = timeArr[ 1 ].length === 1
 					? '0' + timeArr[ 1 ]
 					: timeArr[ 1 ];
-				timeValue = '"' + hours + ':' + minutes + '"';
+				timeValue = hours + ':' + minutes;
 				console.log( '#### getTime timeArr:', timeArr );
 				console.log( '#### getTime timeValue:', timeValue );
 			}

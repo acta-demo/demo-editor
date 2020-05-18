@@ -35,7 +35,10 @@ import Snippet from './snippet/snippet';
 import Variable from './variable/variable';
 import ListOfSpeakers from './listofspeakers/listofspeakers';
 import ViewModeChange from './viewmodechange/viewmodechange';
-import MouseRightClickObserver from './mouserightclickobserver/mouserightclickobserver'
+import MouseRightClickObserver from './mouserightclickobserver/mouserightclickobserver';
+
+import Element from '@ckeditor/ckeditor5-engine/src/model/element';
+import Text from '@ckeditor/ckeditor5-engine/src/model/text';
 
 /**
  * The multi-root editor implementation. It provides inline editables and a single toolbar.
@@ -61,18 +64,18 @@ export default class MultirootEditor extends Editor {
      * for the created editor (on which the editor will be initialized).
      * @param {module:core/editor/editorconfig~EditorConfig} config The editor configuration.
      */
-	constructor(sourceElements, config) {
-		super(config);
+	constructor( sourceElements, config ) {
+		super( config );
 
-		this.data.processor = new HtmlDataProcessor(this.data.viewDocument);
+		this.data.processor = new HtmlDataProcessor( this.data.viewDocument );
 
 		// Create root and UIView element for each editable container.
-		for (const rootName of Object.keys(sourceElements)) {
-			this.model.document.createRoot('$root', rootName);
+		for ( const rootName of Object.keys( sourceElements ) ) {
+			this.model.document.createRoot( '$root', rootName );
 		}
 
-		this.ui = new MultirootEditorUI(this, new MultirootEditorUIView(this.locale, this.editing.view, sourceElements));
-		this.editing.view.addObserver(MouseRightClickObserver);
+		this.ui = new MultirootEditorUI( this, new MultirootEditorUIView( this.locale, this.editing.view, sourceElements ) );
+		this.editing.view.addObserver( MouseRightClickObserver );
 	}
 
 	/**
@@ -84,21 +87,21 @@ export default class MultirootEditor extends Editor {
 		// same as `ui.getEditableElement()` method will not return editables.
 		const data = {};
 		const editables = {};
-		const editablesNames = Array.from(this.ui.getEditableElementsNames());
+		const editablesNames = Array.from( this.ui.getEditableElementsNames() );
 
-		for (const rootName of editablesNames) {
-			data[rootName] = this.getData({ rootName });
-			editables[rootName] = this.ui.getEditableElement(rootName);
+		for ( const rootName of editablesNames ) {
+			data[ rootName ] = this.getData( { rootName } );
+			editables[ rootName ] = this.ui.getEditableElement( rootName );
 		}
 
 		this.ui.destroy();
 
 		return super.destroy()
-			.then(() => {
-				for (const rootName of editablesNames) {
-					setDataInElement(editables[rootName], data[rootName]);
+			.then( () => {
+				for ( const rootName of editablesNames ) {
+					setDataInElement( editables[ rootName ], data[ rootName ] );
 				}
-			});
+			} );
 	}
 
 	/**
@@ -109,32 +112,47 @@ export default class MultirootEditor extends Editor {
      * @param {module:core/editor/editorconfig~EditorConfig} config The editor configuration.
      * @returns {Promise} A promise resolved once the editor is ready. The promise returns the created multi-root editor instance.
      */
-	static create(sourceElements, config) {
-		return new Promise(resolve => {
+	static create( sourceElements, config ) {
+		return new Promise( resolve => {
 
-			const editor = new this(sourceElements, config);
+			const editor = new this( sourceElements, config );
 
 			resolve(
 				editor.initPlugins()
-					.then(() => editor.ui.init())
-					.then(() => {
+					.then( () => editor.ui.init() )
+					.then( () => {
 						const initialData = {};
-						
+
 						// Create initial data object containing data from all roots.
-						for (const rootName of Object.keys(sourceElements)) {
-							initialData[rootName] = getDataFromElement(sourceElements[rootName]);
+						for ( const rootName of Object.keys( sourceElements ) ) {
+							initialData[ rootName ] = getDataFromElement( sourceElements[ rootName ] );
 						}
 
-						return editor.data.init(initialData);
-					})
-					.then(() => editor.fire('ready'))
-					.then(() => editor)
+						return editor.data.init( initialData );
+					} )
+					.then( () => editor.fire( 'ready' ) )
+					.then( () => editor )
 			);
-		});
+		} );
 	}
+
+	static isText( obj ) {
+		if ( obj instanceof Text ) {
+			return true;
+		}
+		return false;
+	}
+
+	static isElement( obj ) {
+		if ( obj instanceof Element ) {
+			return true;
+		}
+		return false;
+	}
+
 }
 
-mix(MultirootEditor, DataApiMixin);
+mix( MultirootEditor, DataApiMixin );
 
 // Plugins to include in the build.
 MultirootEditor.builtinPlugins = [
@@ -169,13 +187,13 @@ MultirootEditor.builtinPlugins = [
 
 // Editor configuration.
 MultirootEditor.defaultConfig = {
-	plugins: [Essentials, Paragraph, Heading, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption,
-		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage, StandardWord, Snippet, Variable, ViewModeChange, ListOfSpeakers],
-	toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'imageUpload', 'blockQuote',
-		'insertTable', 'mediaEmbed', 'undo', 'redo', 'viewmodechange', 'variable', 'lsp'],
+	plugins: [ Essentials, Paragraph, Heading, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption,
+		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage, StandardWord, Snippet, Variable, ViewModeChange, ListOfSpeakers ],
+	toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'imageUpload', 'blockQuote',
+		'insertTable', 'mediaEmbed', 'undo', 'redo', 'viewmodechange', 'variable', 'lsp' ],
 	image: {
-		toolbar: ['imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
-		styles: ['full', 'alignLeft', 'alignRight']
+		toolbar: [ 'imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight' ],
+		styles: [ 'full', 'alignLeft', 'alignRight' ]
 	},
 	table: {
 		contentToolbar: [
