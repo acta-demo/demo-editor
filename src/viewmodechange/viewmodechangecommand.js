@@ -43,7 +43,6 @@ export default class ViewModeChangeCommand extends Command {
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
 							// inner_element._setAttribute('data-viewmode', value);
 							this.handlespanStr( inner_element, value );
-
 						} else if ( inner_element.name == 'div' ) { // Snippets
 							console.log( '#### ViewModeChangeCommand div' );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
@@ -52,11 +51,14 @@ export default class ViewModeChangeCommand extends Command {
 							console.log( '#### ViewModeChangeCommand var_ inner_elements:', inner_elements );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
 							this.handlespanVarSp( inner_element, value );
-
 						} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ).startsWith( 'var_' ) ) {
 							console.log( '#### ViewModeChangeCommand var_ inner_elements:', inner_elements );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
 							this.handlespanVar( inner_element, value );
+						} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ) === 'title' ) {
+							console.log( '#### ViewModeChangeCommand var_ inner_elements:', inner_elements );
+							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
+							this.handlespanTitle( inner_element, value );
 						}
 					}
 				}
@@ -151,6 +153,32 @@ export default class ViewModeChangeCommand extends Command {
 				const _dataSimple = _data.replace( /(^{var_sp:[^:]*:)|(}$)/g, '' );
 				propertyName.getChild( 0 )._data = _dataSimple;
 				const _class = propertyName.getAttribute( 'class' ).replace( /lsp/g, '' ).replace( /\s\s+/g, ' ' ).trim();
+				propertyName._setAttribute( 'class', _class );
+			}
+		}
+
+	}
+
+	handlespanTitle( propertyName, viewmode ) {
+		const _data = propertyName.getChild( 0 )._textData;
+		const _class = propertyName.getAttribute( 'class' );
+		if ( viewmode ) {
+			if ( viewmode === 'coloredview' ) {
+				const _dataSimple = _data.replace( /(^{title:[^:]*:)|(}$)/g, '' );
+				propertyName.getChild( 0 )._data = _dataSimple;
+				if ( !_class.includes( 'title' ) ) {
+					propertyName._setAttribute( 'class', 'title ' + _class );
+				}
+			} else if ( viewmode === 'infoview' && !/(^{title:[^:]*:)|(}$)/g.test( propertyName.getChild( 0 )._data ) ) {
+				const _id = propertyName.getAttribute( 'data-id' );
+				propertyName.getChild( 0 )._data = '{title:' + _id + ':' + propertyName.getChild( 0 )._data + '}';
+				if ( !_class.includes( 'title' ) ) {
+					propertyName._setAttribute( 'class', 'title ' + _class );
+				}
+			} else if ( viewmode === 'simpleview' && /title/g.test( propertyName.getAttribute( 'class' ) ) ) {
+				const _dataSimple = _data.replace( /(^{title:[^:]*:)|(}$)/g, '' );
+				propertyName.getChild( 0 )._data = _dataSimple;
+				const _class = propertyName.getAttribute( 'class' ).replace( /title/g, '' ).replace( /\s\s+/g, ' ' ).trim();
 				propertyName._setAttribute( 'class', _class );
 			}
 		}

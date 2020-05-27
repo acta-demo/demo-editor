@@ -34,6 +34,7 @@ import StandardWord from './standardword/standardword';
 import Snippet from './snippet/snippet';
 import Variable from './variable/variable';
 import ListOfSpeakers from './listofspeakers/listofspeakers';
+import Title from './title/title';
 import ViewModeChange from './viewmodechange/viewmodechange';
 import MouseRightClickObserver from './mouserightclickobserver/mouserightclickobserver';
 
@@ -150,6 +151,35 @@ export default class MultirootEditor extends Editor {
 		return false;
 	}
 
+	static disableCommand( cmd ) {
+    	cmd.on( 'set:isEnabled', forceDisable, { priority: 'highest' } );
+
+    	cmd.isEnabled = false;
+
+    	// Make it possible to enable the command again.
+    	return () => {
+        	cmd.off( 'set:isEnabled', forceDisable );
+        	cmd.refresh();
+    	};
+
+    	function forceDisable( evt ) {
+        	evt.return = false;
+        	evt.stop();
+    	}
+	}
+
+	static disableInput( editor ) {
+		return this.disableCommand( editor.commands.get( 'input' ) );
+	}
+
+	static disableDelete( editor ) {
+		return this.disableCommand( editor.commands.get( 'delete' ) );
+	}
+
+	static disableForwardDelete( editor ) {
+		return this.disableCommand( editor.commands.get( 'forwardDelete' ) );
+	}
+
 }
 
 mix( MultirootEditor, DataApiMixin );
@@ -182,15 +212,17 @@ MultirootEditor.builtinPlugins = [
 	Snippet,
 	Variable,
 	ListOfSpeakers,
-	ViewModeChange
+	ViewModeChange,
+	Title
 ];
 
 // Editor configuration.
 MultirootEditor.defaultConfig = {
 	plugins: [ Essentials, Paragraph, Heading, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption,
-		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage, StandardWord, Snippet, Variable, ViewModeChange, ListOfSpeakers ],
-	toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'imageUpload', 'blockQuote',
-		'insertTable', 'mediaEmbed', 'undo', 'redo', 'viewmodechange', 'variable', 'lsp' ],
+		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage, StandardWord,
+		Snippet, Variable, ViewModeChange, ListOfSpeakers, Title ],
+	toolbar: [ 'heading', '|', 'bold', 'italic', 'bulletedList',
+		'insertTable', 'undo', 'redo', 'viewmodechange' ],
 	image: {
 		toolbar: [ 'imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight' ],
 		styles: [ 'full', 'alignLeft', 'alignRight' ]
@@ -206,5 +238,11 @@ MultirootEditor.defaultConfig = {
 		header: 'Header content goes here',
 		content: 'Main content goes here',
 		footer: 'Footer content goes here'
+	},
+	heading: {
+		options: [
+			{ model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+			{ model: 'heading3', view: 'h3', title: 'Header', class: 'ck-heading_heading3' }
+		]
 	}
 };
