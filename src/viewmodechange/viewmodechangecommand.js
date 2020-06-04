@@ -38,6 +38,7 @@ export default class ViewModeChangeCommand extends Command {
 					const inner_elements = paragraph_element.getChildren();
 					console.log( '#### ViewModeChangeCommand inner_elements:', inner_elements );
 					for ( const inner_element of inner_elements ) {
+						console.log( '#### ViewModeChangeCommand inner_element:', inner_element );
 						if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ) === 'str' ) { // Strings, References, etc.
 							console.log( '#### ViewModeChangeCommand str' );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
@@ -48,17 +49,21 @@ export default class ViewModeChangeCommand extends Command {
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
 							this.handlediv( inner_element, value, viewWriter );
 						} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ) === 'var_sp' ) {
-							console.log( '#### ViewModeChangeCommand var_ inner_elements:', inner_elements );
+							console.log( '#### ViewModeChangeCommand var_ inner_element:', inner_element );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
 							this.handlespanVarSp( inner_element, value );
 						} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ).startsWith( 'var_' ) ) {
-							console.log( '#### ViewModeChangeCommand var_ inner_elements:', inner_elements );
+							console.log( '#### ViewModeChangeCommand var_ inner_element:', inner_element );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
 							this.handlespanVar( inner_element, value );
 						} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ) === 'title' ) {
-							console.log( '#### ViewModeChangeCommand var_ inner_elements:', inner_elements );
+							console.log( '#### ViewModeChangeCommand var_ inner_element:', inner_element );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
 							this.handlespanTitle( inner_element, value );
+						} else if ( inner_element.name == 'table' ) {
+							console.log( '#### ViewModeChangeCommand table inner_element:', inner_element );
+							// viewWriter.setAttribute( 'data-viewmode', value, inner_element );
+							this.handleTable( inner_element, value, viewWriter );
 						}
 					}
 				}
@@ -70,6 +75,48 @@ export default class ViewModeChangeCommand extends Command {
 
 	refresh() {
 		this.isEnabled = true;
+	}
+
+	handleTable( propertyName, value, viewWriter ) {
+		const childsTBody = propertyName.getChildren();
+		console.log( '#### handleTable childsTBody:', childsTBody );
+		for ( const elementTBody of childsTBody ) {
+			const childsTr = elementTBody.getChildren();
+			console.log( '#### handleTable childsTr:', childsTr );
+			for ( const elementTr of childsTr ) {
+				const childsTd = elementTr.getChildren();
+				console.log( '#### handleTable childsTd:', childsTd );
+				for ( const elementTd of childsTd ) {
+					const inner_elements = elementTd.getChildren();
+					console.log( '#### handleTable inner_elements:', inner_elements );
+					for ( const inner_element of inner_elements ) {
+						console.log( '#### handleTable inner_element:', inner_element );
+						if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ) === 'str' ) { // Strings, References, etc.
+							console.log( '#### handleTable str' );
+							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
+							// inner_element._setAttribute('data-viewmode', value);
+							this.handlespanStr( inner_element, value );
+						} else if ( inner_element.name == 'div' ) { // Snippets
+							console.log( '#### handleTable div' );
+							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
+							this.handlediv( inner_element, value, viewWriter );
+						} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ) === 'var_sp' ) {
+							console.log( '#### handleTable var_ inner_element:', inner_element );
+							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
+							this.handlespanVarSp( inner_element, value );
+						} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ).startsWith( 'var_' ) ) {
+							console.log( '#### handleTable var_ inner_element:', inner_element );
+							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
+							this.handlespanVar( inner_element, value );
+						} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ) === 'title' ) {
+							console.log( '#### handleTable var_ inner_element:', inner_element );
+							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
+							this.handlespanTitle( inner_element, value );
+						}
+					}
+				}
+			}
+		}
 	}
 
 	handlespanStr( propertyName, viewmode ) {
@@ -236,7 +283,12 @@ export default class ViewModeChangeCommand extends Command {
 				console.log( '#### element inside div:', element );
 				this.handlespanVar( element, viewmode );
 
+			} else if ( element instanceof Element && element.name === 'span' && element.getAttribute( 'data-type' ) === 'title' ) {
+				console.log( '#### element inside div:', element );
+				this.handlespanTitle( element, viewmode );
+
 			}
+
 			// const _datatype = spanelement.getAttribute('data-type');
 		}
 

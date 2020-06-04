@@ -188,7 +188,7 @@ export default class VariableEditing extends Plugin {
 			const textcontent = modelItem.getAttribute( 'data-content' );
 
 			const varView = viewWriter.createContainerElement( 'span', {
-				class: 'variable', 'data-id': variableId, 'data-type': dataType
+				class: 'variable', 'data-id': variableId, 'data-type': dataType, 'data-content': textcontent
 			} );
 
 			// Insert the variable (as a text).

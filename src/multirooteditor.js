@@ -29,6 +29,8 @@ import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice';
 import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
+import TableProperties from '@ckeditor/ckeditor5-table/src/tableproperties';
+import TableCellProperties from '@ckeditor/ckeditor5-table/src/tablecellproperties';
 
 import StandardWord from './standardword/standardword';
 import Snippet from './snippet/snippet';
@@ -37,6 +39,7 @@ import ListOfSpeakers from './listofspeakers/listofspeakers';
 import Title from './title/title';
 import ViewModeChange from './viewmodechange/viewmodechange';
 import MouseRightClickObserver from './mouserightclickobserver/mouserightclickobserver';
+import DoubleClickObserver from './doubleclickobserver/doubleclickobserver';
 
 import Element from '@ckeditor/ckeditor5-engine/src/model/element';
 import Text from '@ckeditor/ckeditor5-engine/src/model/text';
@@ -77,6 +80,7 @@ export default class MultirootEditor extends Editor {
 
 		this.ui = new MultirootEditorUI( this, new MultirootEditorUIView( this.locale, this.editing.view, sourceElements ) );
 		this.editing.view.addObserver( MouseRightClickObserver );
+		this.editing.view.addObserver( DoubleClickObserver );
 	}
 
 	/**
@@ -134,6 +138,9 @@ export default class MultirootEditor extends Editor {
 					.then( () => editor.fire( 'ready' ) )
 					.then( () => editor )
 			);
+
+			editor.editing.view.addObserver( DoubleClickObserver );
+			editor.editing.view.addObserver( MouseRightClickObserver );
 		} );
 	}
 
@@ -151,33 +158,20 @@ export default class MultirootEditor extends Editor {
 		return false;
 	}
 
-	static disableCommand( cmd ) {
-    	cmd.on( 'set:isEnabled', forceDisable, { priority: 'highest' } );
-
-    	cmd.isEnabled = false;
-
-    	// Make it possible to enable the command again.
-    	return () => {
-        	cmd.off( 'set:isEnabled', forceDisable );
-        	cmd.refresh();
-    	};
-
-    	function forceDisable( evt ) {
-        	evt.return = false;
-        	evt.stop();
-    	}
+	static disableAllKeyboard( editor ) {
+		editor.commands.get( 'input' ).forceDisabled( 'input' );
+		editor.commands.get( 'delete' ).forceDisabled( 'delete' );
+		editor.commands.get( 'enter' ).forceDisabled( 'enter' );
+		editor.commands.get( 'forwardDelete' ).forceDisabled( 'forwardDelete' );
+		editor.commands.get( 'shiftEnter' ).forceDisabled( 'shiftEnter' );
 	}
 
-	static disableInput( editor ) {
-		return this.disableCommand( editor.commands.get( 'input' ) );
-	}
-
-	static disableDelete( editor ) {
-		return this.disableCommand( editor.commands.get( 'delete' ) );
-	}
-
-	static disableForwardDelete( editor ) {
-		return this.disableCommand( editor.commands.get( 'forwardDelete' ) );
+	static enableAllKeyboard( editor ) {
+		editor.commands.get( 'input' ).clearForceDisabled( 'input' );
+		editor.commands.get( 'delete' ).clearForceDisabled( 'delete' );
+		editor.commands.get( 'enter' ).clearForceDisabled( 'enter' );
+		editor.commands.get( 'forwardDelete' ).clearForceDisabled( 'forwardDelete' );
+		editor.commands.get( 'shiftEnter' ).clearForceDisabled( 'shiftEnter' );
 	}
 
 }
@@ -219,7 +213,7 @@ MultirootEditor.builtinPlugins = [
 // Editor configuration.
 MultirootEditor.defaultConfig = {
 	plugins: [ Essentials, Paragraph, Heading, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption,
-		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, MediaEmbed, EasyImage, StandardWord,
+		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, TableProperties, TableCellProperties, MediaEmbed, EasyImage, StandardWord,
 		Snippet, Variable, ViewModeChange, ListOfSpeakers, Title ],
 	toolbar: [ 'heading', '|', 'bold', 'italic', 'bulletedList',
 		'insertTable', 'undo', 'redo', 'viewmodechange' ],
@@ -231,7 +225,9 @@ MultirootEditor.defaultConfig = {
 		contentToolbar: [
 			'tableColumn',
 			'tableRow',
-			'mergeTableCells'
+			'mergeTableCells',
+			'tableProperties',
+			'tableCellProperties'
 		]
 	},
 	placeholder: {

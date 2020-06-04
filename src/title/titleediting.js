@@ -164,7 +164,7 @@ export default class TitleEditing extends Plugin {
 			const textcontent = modelItem.getAttribute( 'data-content' );
 
 			const varView = viewWriter.createContainerElement( 'span', {
-				class: 'title', 'data-id': variableId, 'data-type': dataType, 'data-json': dataJson
+				class: 'title', 'data-id': variableId, 'data-type': dataType, 'data-json': dataJson, 'data-content': textcontent
 			} );
 
 			// Insert the title (as a text).
