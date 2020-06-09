@@ -5,7 +5,7 @@ import VariableCommand from './variablecommand';
 import Util from '../utils/Util';
 import './css/variable.css';
 import format from 'date-fns/format';
-import { enUS } from 'date-fns/locale';
+import { enUS, de } from 'date-fns/locale';
 
 
 export default class VariableEditing extends Plugin {
@@ -49,7 +49,7 @@ export default class VariableEditing extends Plugin {
 
 		schema.register( 'variable', {
 			// Allow wherever text is allowed:
-			allowWhere: '$text',
+			allowWhere: [ '$text', 'snp', '$block', 'paragraph' ],
 
 			// The variable will act as an inline node:
 			isInline: true,
@@ -58,7 +58,7 @@ export default class VariableEditing extends Plugin {
 			isObject: true,
 
 			// The variable can have many types, like date, name, surname, etc:
-			allowAttributes: [ 'data-id', 'data-content', 'data-viewmode', 'data-type' ]
+			allowAttributes: [ 'data-id', 'data-content', 'data-viewmode', 'data-type', 'data-language' ]
 		} );
 	}
 
@@ -74,13 +74,17 @@ export default class VariableEditing extends Plugin {
 
 				const variableid = viewElement.getAttribute( 'data-id' );
 				const dataType = viewElement.getAttribute( 'data-type' );
+				const dataLanguage = viewElement.getAttribute( 'data-language' )
+					? viewElement.getAttribute( 'data-language' )
+					: 'en';
 				const _text = viewElement.getChild( 0 );
 
 				const modelElement = modelWriter.createElement( 'variable', {
 					'data-id': variableid,
 					'data-content': Util.encodeHTML( _text.data ),
 					'data-viewmode': VariableEditing.viewmode,
-					'data-type': dataType
+					'data-type': dataType,
+					'data-language': dataLanguage
 				} );
 				console.log( '#### upcast variable modelElement:', modelElement );
 				return modelElement;
@@ -89,7 +93,6 @@ export default class VariableEditing extends Plugin {
 
 		// Add a converter for editing downcast pipeline.
 		conversion.for( 'editingDowncast' ).add( dispatcher => {
-			// Specify converter for attribute `text` on element `dailyNote`.
 			dispatcher.on( 'attribute:data-content:variable', ( evt, data, conversionApi ) => {
 				// console.log('#### editingDowncast attr evt:', evt);
 				console.log( '#### editingDowncast attr data:', data );// attributeNewValue
@@ -101,14 +104,17 @@ export default class VariableEditing extends Plugin {
 				// Create <p> element that will be inserted in view at `viewPosition`.
 				const modelItem = data.item;
 				let dataContent = 'UNRESOLVED';
+				const dataLanguage = modelItem.getAttribute( 'data-language' )
+					? modelItem.getAttribute( 'data-language' )
+					: 'en';
 				if ( modelItem.getAttribute( 'data-type' ) === 'var_date' ) {
 					dataContent = modelItem.getAttribute( 'data-content' ) === 'UNRESOLVED'
 						? 'UNRESOLVED'
-						: getDate( modelItem.getAttribute( 'data-content' ) );
+						: getDate( modelItem.getAttribute( 'data-content' ), dataLanguage );
 				} else if ( modelItem.getAttribute( 'data-type' ) === 'var_time' ) {
 					dataContent = modelItem.getAttribute( 'data-content' ) === 'UNRESOLVED'
 						? 'UNRESOLVED'
-						: getTime( modelItem.getAttribute( 'data-content' ) );
+						: getTime( modelItem.getAttribute( 'data-content' ), dataLanguage );
 				} else {
 					dataContent = modelItem.getAttribute( 'data-content' );
 				}
@@ -124,9 +130,9 @@ export default class VariableEditing extends Plugin {
 							: Util.decodeHTML( dataContent ) )
 						+ '}';
 				} else if ( VariableEditing.viewmode === 'coloredview' ) {
-					widgetElement.getChild( 0 )._data = dataContent;
+					widgetElement.getChild( 0 )._data = Util.decodeHTML( dataContent );
 				} else if ( VariableEditing.viewmode === 'simpleview' ) {
-					widgetElement.getChild( 0 )._data = dataContent;
+					widgetElement.getChild( 0 )._data = Util.decodeHTML( dataContent );
 				}
 				console.log( '#### editingDowncast attr widgetElement:', widgetElement );
 
@@ -186,9 +192,12 @@ export default class VariableEditing extends Plugin {
 			const variableId = modelItem.getAttribute( 'data-id' );
 			const dataType = modelItem.getAttribute( 'data-type' );
 			const textcontent = modelItem.getAttribute( 'data-content' );
+			const dataLanguage = modelItem.getAttribute( 'data-language' )
+				? modelItem.getAttribute( 'data-language' )
+				: 'en';
 
 			const varView = viewWriter.createContainerElement( 'span', {
-				class: 'variable', 'data-id': variableId, 'data-type': dataType, 'data-content': textcontent
+				class: 'variable', 'data-id': variableId, 'data-type': dataType, 'data-content': textcontent, 'data-language': dataLanguage
 			} );
 
 			// Insert the variable (as a text).
@@ -199,20 +208,21 @@ export default class VariableEditing extends Plugin {
 			return varView;
 		}
 
-		function getDate( dataContent ) {
+		function getDate( dataContent, language ) {
 			let dateValue = 'UNRESOLVED';
 			const patt = new RegExp( '^[0-9]{4}[.\/-]([0-9]{2}|[0-9]{1})[.\/-]([0-9]{2}|[0-9]{1})$' );
 			if ( patt.test( dataContent ) ) {
+				const localeObj = ( language == 'de' ) ? { locale: de } : { locale: enUS };
 				const dateArr = dataContent.split( '/' );
 				console.log( '#### getDate dateArr:', dateArr );
 				dateValue = format( new Date( parseInt( dateArr[ 0 ] ), parseInt( dateArr[ 1 ] ) - 1, parseInt( dateArr[ 2 ] ) ),
-					'EEEE, d MMMM yyyy', { locale: enUS } );
+					'EEEE, d MMMM yyyy', localeObj );
 				console.log( '#### createVariableDateEditingView dateValue:', dateValue );
 			}
 			return dateValue;
 		}
 
-		function getTime( dataContent ) {
+		function getTime( dataContent, language ) {
 			let timeValue = 'UNRESOLVED';
 			const patt = new RegExp( '^([0-9]{2}|[0-9]{1})[.\:-]([0-9]{2}|[0-9]{1})$' );
 			if ( patt.test( dataContent ) ) {
@@ -223,7 +233,7 @@ export default class VariableEditing extends Plugin {
 				const minutes = timeArr[ 1 ].length === 1
 					? '0' + timeArr[ 1 ]
 					: timeArr[ 1 ];
-				timeValue = hours + ':' + minutes;
+				timeValue = ( language == 'de' ) ? hours + ':' + minutes + ' Uhr' : hours + ':' + minutes;
 				console.log( '#### getTime timeArr:', timeArr );
 				console.log( '#### getTime timeValue:', timeValue );
 			}
@@ -234,24 +244,27 @@ export default class VariableEditing extends Plugin {
 			console.log( '#### createVariableDateEditingView 1' );
 			const variableId = modelItem.getAttribute( 'data-id' );
 			const dataType = modelItem.getAttribute( 'data-type' );
+			const dataLanguage = modelItem.getAttribute( 'data-language' )
+				? modelItem.getAttribute( 'data-language' )
+				: 'en';
 			const textcontent = modelItem.getAttribute( 'data-content' );
 			let varView;
 			if ( VariableEditing.viewmode === 'infoview' ) {
 				console.log( '#### createVariableDateEditingView 2' );
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'variable', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_date'
+					class: 'variable', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_date', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( '{' + dataType + ':' + variableId + ':' + Util.decodeHTML( getDate( textcontent ) ) + '}' );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( VariableEditing.viewmode === 'coloredview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'variable', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'var_date'
+					class: 'variable', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'var_date', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( getDate( textcontent ) ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( VariableEditing.viewmode === 'simpleview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_date'
+					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_date', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( getDate( textcontent ) ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
@@ -264,23 +277,26 @@ export default class VariableEditing extends Plugin {
 
 			const variableId = modelItem.getAttribute( 'data-id' );
 			const dataType = modelItem.getAttribute( 'data-type' );
+			const dataLanguage = modelItem.getAttribute( 'data-language' )
+				? modelItem.getAttribute( 'data-language' )
+				: 'en';
 			const textcontent = modelItem.getAttribute( 'data-content' );
 			let varView;
 			if ( VariableEditing.viewmode === 'infoview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'variable', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_time'
+					class: 'variable', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_time', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( '{' + dataType + ':' + variableId + ':' + Util.decodeHTML( textcontent ) + '}' );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( VariableEditing.viewmode === 'coloredview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'variable', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'var_time'
+					class: 'variable', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'var_time', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( VariableEditing.viewmode === 'simpleview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_time'
+					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_time', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
@@ -293,23 +309,26 @@ export default class VariableEditing extends Plugin {
 
 			const variableId = modelItem.getAttribute( 'data-id' );
 			const dataType = modelItem.getAttribute( 'data-type' );
+			const dataLanguage = modelItem.getAttribute( 'data-language' )
+				? modelItem.getAttribute( 'data-language' )
+				: 'en';
 			const textcontent = modelItem.getAttribute( 'data-content' );
 			let varView;
 			if ( VariableEditing.viewmode === 'infoview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'variable', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_str'
+					class: 'variable', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_str', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( '{' + dataType + ':' + variableId + ':' + Util.decodeHTML( textcontent ) + '}' );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( VariableEditing.viewmode === 'coloredview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'variable', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'var_str'
+					class: 'variable', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'var_str', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( VariableEditing.viewmode === 'simpleview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_str'
+					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_str', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );

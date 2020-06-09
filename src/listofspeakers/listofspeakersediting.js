@@ -52,7 +52,7 @@ export default class ListOfSpeakersEditing extends Plugin {
 			isObject: true,
 
 			// The variable can have many types, like date, name, surname, etc:
-			allowAttributes: [ 'data-id', 'data-content', 'data-viewmode', 'data-type', 'data-json' ]
+			allowAttributes: [ 'data-id', 'data-content', 'data-viewmode', 'data-type', 'data-json', 'data-language' ]
 		} );
 	}
 
@@ -68,6 +68,9 @@ export default class ListOfSpeakersEditing extends Plugin {
 
 				const variableid = viewElement.getAttribute( 'data-id' );
 				const dataType = viewElement.getAttribute( 'data-type' );
+				const dataLanguage = viewElement.getAttribute( 'data-language' )
+					? viewElement.getAttribute( 'data-language' )
+					: 'en';
 				const dataJson = viewElement.getAttribute( 'data-json' ) ? viewElement.getAttribute( 'data-json' ) : '';
 				const _text = viewElement.getChild( 0 );
 
@@ -76,7 +79,8 @@ export default class ListOfSpeakersEditing extends Plugin {
 					'data-content': Util.encodeHTML( _text.data ),
 					'data-viewmode': ListOfSpeakersEditing.viewmode,
 					'data-type': dataType,
-					'data-json': dataJson
+					'data-json': dataJson,
+					'data-language': dataLanguage
 				} );
 				console.log( '#### upcast lsp modelElement:', modelElement );
 				return modelElement;
@@ -107,7 +111,7 @@ export default class ListOfSpeakersEditing extends Plugin {
 					widgetElement.getChild( 0 )._data = '{' + dataType + ':' + variableId + ':'
 						+ Util.decodeHTML( dataContent ) + '}';
 				} else {
-					widgetElement.getChild( 0 )._data = dataContent;
+					widgetElement.getChild( 0 )._data = Util.decodeHTML( dataContent );
 				}
 				console.log( '#### editingDowncast attr widgetElement:', widgetElement );
 
@@ -160,11 +164,15 @@ export default class ListOfSpeakersEditing extends Plugin {
 
 			const variableId = modelItem.getAttribute( 'data-id' );
 			const dataType = modelItem.getAttribute( 'data-type' );
+			const dataLanguage = modelItem.getAttribute( 'data-language' )
+				? modelItem.getAttribute( 'data-language' )
+				: 'en';
 			const dataJson = modelItem.getAttribute( 'data-json' ) ? modelItem.getAttribute( 'data-json' ) : '';
 			const textcontent = modelItem.getAttribute( 'data-content' );
 
 			const varView = viewWriter.createContainerElement( 'span', {
-				class: 'lsp', 'data-id': variableId, 'data-type': dataType, 'data-json': dataJson, 'data-content': textcontent
+				class: 'lsp', 'data-id': variableId, 'data-type': dataType, 'data-json': dataJson,
+				'data-content': textcontent, 'data-language': dataLanguage
 			} );
 
 			// Insert the lsp (as a text).
@@ -179,25 +187,31 @@ export default class ListOfSpeakersEditing extends Plugin {
 			console.log( '#### createVariableLspEditingView 1' );
 			const variableId = modelItem.getAttribute( 'data-id' );
 			const dataType = modelItem.getAttribute( 'data-type' );
+			const dataLanguage = modelItem.getAttribute( 'data-language' )
+				? modelItem.getAttribute( 'data-language' )
+				: 'en';
 			const dataJson = modelItem.getAttribute( 'data-json' ) ? modelItem.getAttribute( 'data-json' ) : '';
 			const textcontent = modelItem.getAttribute( 'data-content' );
 			let varView;
 			if ( ListOfSpeakersEditing.viewmode === 'infoview' ) {
 				console.log( '#### createVariableLspEditingView 2' );
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'lsp', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_sp', 'data-json': dataJson
+					class: 'lsp', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_sp',
+					'data-json': dataJson, 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( '{' + dataType + ':' + variableId + ':' + Util.decodeHTML( textcontent ) + '}' );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( ListOfSpeakersEditing.viewmode === 'coloredview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'lsp', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'var_sp', 'data-json': dataJson
+					class: 'lsp', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'var_sp',
+					'data-json': dataJson, 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( ListOfSpeakersEditing.viewmode === 'simpleview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_sp', 'data-json': dataJson
+					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_sp',
+					'data-json': dataJson, 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );

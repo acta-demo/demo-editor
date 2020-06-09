@@ -10,6 +10,7 @@ import MultirootEditorUIView from './multirooteditoruiview';
 import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials';
 import UploadAdapter from '@ckeditor/ckeditor5-adapter-ckfinder/src/uploadadapter';
 import Autoformat from '@ckeditor/ckeditor5-autoformat/src/autoformat';
+import Alignment from '@ckeditor/ckeditor5-alignment/src/alignment';
 import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
 import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
 import BlockQuote from '@ckeditor/ckeditor5-block-quote/src/blockquote';
@@ -40,6 +41,10 @@ import Title from './title/title';
 import ViewModeChange from './viewmodechange/viewmodechange';
 import MouseRightClickObserver from './mouserightclickobserver/mouserightclickobserver';
 import DoubleClickObserver from './doubleclickobserver/doubleclickobserver';
+import DiffByWord from './diffbyword/diffbyword';
+import DiffByEfficiency from './diffbyefficiency/diffbyefficiency';
+import ShowHeaderFooter from './showheaderfooter/showheaderfooter';
+import MergeContent from './mergecontent/mergecontent';
 
 import Element from '@ckeditor/ckeditor5-engine/src/model/element';
 import Text from '@ckeditor/ckeditor5-engine/src/model/text';
@@ -207,16 +212,21 @@ MultirootEditor.builtinPlugins = [
 	Variable,
 	ListOfSpeakers,
 	ViewModeChange,
-	Title
+	Title,
+	DiffByWord,
+	DiffByEfficiency,
+	ShowHeaderFooter,
+	MergeContent,
+	Alignment
 ];
 
 // Editor configuration.
 MultirootEditor.defaultConfig = {
-	plugins: [ Essentials, Paragraph, Heading, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption,
+	plugins: [ Essentials, Paragraph, Heading, Alignment, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption,
 		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, TableProperties, TableCellProperties, MediaEmbed, EasyImage, StandardWord,
-		Snippet, Variable, ViewModeChange, ListOfSpeakers, Title ],
-	toolbar: [ 'heading', '|', 'bold', 'italic', 'bulletedList',
-		'insertTable', 'undo', 'redo', 'viewmodechange' ],
+		Snippet, Variable, ViewModeChange, ListOfSpeakers, Title, DiffByWord, DiffByEfficiency, ShowHeaderFooter, MergeContent ],
+	toolbar: [ 'heading', '|', 'bold', 'italic', 'bulletedList', '|', 'alignment:left', 'alignment:right', 'alignment:center', 'alignment:justify',
+		'|', 'insertTable', 'undo', 'redo', 'viewmodechange', '|', 'diffbyword', 'diffbyefficiency', 'showheaderfooter', 'merge' ],
 	image: {
 		toolbar: [ 'imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight' ],
 		styles: [ 'full', 'alignLeft', 'alignRight' ]

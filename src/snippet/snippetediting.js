@@ -48,7 +48,7 @@ export default class SnippetEditing extends Plugin {
 			// Allow wherever text is allowed:
 
 			allowWhere: '$text',
-    		allowContentOf: [ '$block', '$text' ],
+			allowContentOf: [ '$block', '$text' ],
 
 			// The snp will act as an inline node:
 			isInline: true,
@@ -57,7 +57,7 @@ export default class SnippetEditing extends Plugin {
 			isObject: true,
 
 			// The snp can have many types, like date, name, surname, etc:
-			allowAttributes: [ 'data-id', 'data-content', 'data-type', 'data-viewmode' ]
+			allowAttributes: [ 'data-id', 'data-content', 'data-type', 'data-viewmode', 'data-language' ]
 		} );
 
 	}
@@ -73,11 +73,15 @@ export default class SnippetEditing extends Plugin {
 			model: ( viewElement, modelWriter ) => {
 
 				const variableid = viewElement.getAttribute( 'data-id' );
+				const dataLanguage = viewElement.getAttribute( 'data-language' )
+					? viewElement.getAttribute( 'data-language' )
+					: 'en';
 
 				const modelElement = modelWriter.createElement( 'snp', {
 					'data-id': variableid,
 					'data-viewmode': SnippetEditing.viewmode,
-					'data-type': 'snp'
+					'data-type': 'snp',
+					'data-language': dataLanguage
 				} );
 
 				return modelElement;
@@ -123,23 +127,26 @@ export default class SnippetEditing extends Plugin {
 		function createSnpEditingView( modelItem, viewWriter ) {
 
 			const variableId = modelItem.getAttribute( 'data-id' );
+			const dataLanguage = modelItem.getAttribute( 'data-language' )
+				? modelItem.getAttribute( 'data-language' )
+				: 'en';
 			let snpView;
 			if ( SnippetEditing.viewmode === 'infoview' ) {
 				const _before = '{snp:' + variableId + ':';
 				const _after = '}';
 				snpView = viewWriter.createContainerElement( 'div', {
 					class: 'snippet', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'snp',
-					'data-before': _before, 'data-after': _after
+					'data-before': _before, 'data-after': _after, 'data-language': dataLanguage
 				} );
 			} else if ( SnippetEditing.viewmode === 'coloredview' ) {
 				snpView = viewWriter.createContainerElement( 'div', {
 					class: 'snippet', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'snp',
-					'data-before': '', 'data-after': ''
+					'data-before': '', 'data-after': '', 'data-language': dataLanguage
 				} );
 			} else if ( SnippetEditing.viewmode === 'simpleview' ) {
 				snpView = viewWriter.createContainerElement( 'div', {
 					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'snp',
-					'data-before': '', 'data-after': ''
+					'data-before': '', 'data-after': '', 'data-language': dataLanguage
 				} );
 			}
 
@@ -149,10 +156,13 @@ export default class SnippetEditing extends Plugin {
 		function createSnpDataView( modelItem, viewWriter ) {
 
 			const variableId = modelItem.getAttribute( 'data-id' );
+			const dataLanguage = modelItem.getAttribute( 'data-language' )
+				? modelItem.getAttribute( 'data-language' )
+				: 'en';
 			// const textcontent = modelItem.getAttribute('data-content');
 
 			const snpView = viewWriter.createContainerElement( 'span', {
-				class: 'snippet', 'data-id': variableId, 'data-type': 'snp'
+				class: 'snippet', 'data-id': variableId, 'data-type': 'snp', 'data-language': dataLanguage
 			} );
 
 			// Insert the snp (as a text).

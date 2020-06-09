@@ -107,7 +107,7 @@ export default class TitleEditing extends Plugin {
 					widgetElement.getChild( 0 )._data = '{' + dataType + ':' + variableId + ':'
 						+ Util.decodeHTML( dataContent ) + '}';
 				} else {
-					widgetElement.getChild( 0 )._data = dataContent;
+					widgetElement.getChild( 0 )._data = Util.decodeHTML( dataContent );
 				}
 				console.log( '#### editingDowncast attr widgetElement:', widgetElement );
 

@@ -51,7 +51,7 @@ export default class StandardWordEditing extends Plugin {
 
 		schema.register( 'str', {
 			// Allow wherever text is allowed:
-			allowWhere: [ '$text', 'snp', 'table', '$block' ],
+			allowWhere: [ '$text', 'snp', '$block', 'paragraph' ],
 
 			// The str will act as an inline node:
 			isInline: true,
@@ -60,7 +60,7 @@ export default class StandardWordEditing extends Plugin {
 			isObject: true,
 
 			// The str can have many types, like date, name, surname, etc:
-			allowAttributes: [ 'data-id', 'data-content', 'data-type', 'data-viewmode' ]
+			allowAttributes: [ 'data-id', 'data-content', 'data-type', 'data-viewmode', 'data-language' ]
 		} );
 
 	}
@@ -76,13 +76,17 @@ export default class StandardWordEditing extends Plugin {
 			model: ( viewElement, modelWriter ) => {
 
 				const variableid = viewElement.getAttribute( 'data-id' );
+				const dataLanguage = viewElement.getAttribute( 'data-language' )
+					? viewElement.getAttribute( 'data-language' )
+					: 'en';
 				const _text = viewElement.getChild( 0 );
 
 				const modelElement = modelWriter.createElement( 'str', {
 					'data-id': variableid,
 					'data-content': Util.encodeHTML( _text.data ),
 					'data-viewmode': StandardWordEditing.viewmode,
-					'data-type': 'str'
+					'data-type': 'str',
+					'data-language': dataLanguage
 				} );
 
 				return modelElement;
@@ -125,26 +129,29 @@ export default class StandardWordEditing extends Plugin {
 		function createStrEditingView( modelItem, viewWriter ) {
 
 			const variableId = modelItem.getAttribute( 'data-id' );
+			const dataLanguage = modelItem.getAttribute( 'data-language' )
+				? modelItem.getAttribute( 'data-language' )
+				: 'en';
 			const textcontent = modelItem.getAttribute( 'data-content' );
 			let strView;
 			if ( StandardWordEditing.viewmode === 'infoview' ) {
 				strView = viewWriter.createContainerElement( 'span', {
 					class: 'standardword', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'str',
-					'draggable': 'true', 'ondragstart': 'ondragstart($event)'
+					'draggable': 'true', 'ondragstart': 'ondragstart($event)', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( '{str:' + variableId + ':' + Util.decodeHTML( textcontent ) + '}' );
 				viewWriter.insert( viewWriter.createPositionAt( strView, 0 ), innerText );
 			} else if ( StandardWordEditing.viewmode === 'coloredview' ) {
 				strView = viewWriter.createContainerElement( 'span', {
 					class: 'standardword', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'str',
-					'draggable': 'true', 'ondragstart': 'ondragstart($event)'
+					'draggable': 'true', 'ondragstart': 'ondragstart($event)', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( strView, 0 ), innerText );
 			} else if ( StandardWordEditing.viewmode === 'simpleview' ) {
 				strView = viewWriter.createContainerElement( 'span', {
 					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'str',
-					'draggable': 'true', 'ondragstart': 'ondragstart($event)'
+					'draggable': 'true', 'ondragstart': 'ondragstart($event)', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( strView, 0 ), innerText );
@@ -156,10 +163,13 @@ export default class StandardWordEditing extends Plugin {
 		function createStrDataView( modelItem, viewWriter ) {
 
 			const variableId = modelItem.getAttribute( 'data-id' );
+			const dataLanguage = modelItem.getAttribute( 'data-language' )
+				? modelItem.getAttribute( 'data-language' )
+				: 'en';
 			const textcontent = modelItem.getAttribute( 'data-content' );
 
 			const strView = viewWriter.createContainerElement( 'span', {
-				class: 'standardword', 'data-id': variableId, 'data-type': 'str'
+				class: 'standardword', 'data-id': variableId, 'data-type': 'str', 'data-language': dataLanguage
 			} );
 
 			// Insert the str (as a text).
