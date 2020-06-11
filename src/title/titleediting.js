@@ -96,7 +96,9 @@ export default class TitleEditing extends Plugin {
 
 				// Create <p> element that will be inserted in view at `viewPosition`.
 				const modelItem = data.item;
-				const dataContent = modelItem.getAttribute( 'data-content' ) === 'UNRESOLVED'
+				const dataContent = ( !modelItem.getAttribute( 'data-content' )
+									|| modelItem.getAttribute( 'data-content' ) == 'UNRESOLVED'
+									|| modelItem.getAttribute( 'data-content' ) == '' )
 					? 'UNRESOLVED'
 					: modelItem.getAttribute( 'data-content' );
 				console.log( '#### editingDowncast dataContent:', dataContent );
