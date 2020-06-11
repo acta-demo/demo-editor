@@ -207,6 +207,8 @@ MultirootEditor.builtinPlugins = [
 	PasteFromOffice,
 	Table,
 	TableToolbar,
+	TableProperties,
+	TableCellProperties,
 	StandardWord,
 	Snippet,
 	Variable,
