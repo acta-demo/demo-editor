@@ -23,6 +23,7 @@ import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
 import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
 import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 import Indent from '@ckeditor/ckeditor5-indent/src/indent';
+import IndentBlock from '@ckeditor/ckeditor5-indent/src/indentblock';
 import Link from '@ckeditor/ckeditor5-link/src/link';
 import List from '@ckeditor/ckeditor5-list/src/list';
 import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
@@ -32,6 +33,7 @@ import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import TableProperties from '@ckeditor/ckeditor5-table/src/tableproperties';
 import TableCellProperties from '@ckeditor/ckeditor5-table/src/tablecellproperties';
+import PageBreak from '@ckeditor/ckeditor5-page-break/src/pagebreak';
 
 import StandardWord from './standardword/standardword';
 import Snippet from './snippet/snippet';
@@ -48,6 +50,8 @@ import MergeContent from './mergecontent/mergecontent';
 
 import Element from '@ckeditor/ckeditor5-engine/src/model/element';
 import Text from '@ckeditor/ckeditor5-engine/src/model/text';
+
+import './customcss/custom.css';
 
 /**
  * The multi-root editor implementation. It provides inline editables and a single toolbar.
@@ -219,19 +223,27 @@ MultirootEditor.builtinPlugins = [
 	DiffByEfficiency,
 	ShowHeaderFooter,
 	MergeContent,
-	Alignment
+	Alignment,
+	PageBreak,
+	Indent,
+	IndentBlock
 ];
 
 // Editor configuration.
 MultirootEditor.defaultConfig = {
-	plugins: [ Essentials, Paragraph, Heading, Alignment, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption,
+	plugins: [ Essentials, Paragraph, Heading, Alignment, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption, PageBreak, Indent, IndentBlock,
 		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, TableProperties, TableCellProperties, MediaEmbed, EasyImage, StandardWord,
 		Snippet, Variable, ViewModeChange, ListOfSpeakers, Title, DiffByWord, DiffByEfficiency, ShowHeaderFooter, MergeContent ],
-	toolbar: [ 'heading', '|', 'bold', 'italic', 'bulletedList', '|', 'alignment:left', 'alignment:right', 'alignment:center', 'alignment:justify',
-		'|', 'insertTable', 'undo', 'redo', 'viewmodechange', '|', 'diffbyword', 'diffbyefficiency', 'showheaderfooter', 'merge' ],
+	toolbar: [ 'heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'bulletedList', '|', 'alignment:left', 'alignment:right',
+		'alignment:center', 'alignment:justify', '|', 'insertTable', 'undo', 'redo', 'viewmodechange', '|', 'diffbyword', 'diffbyefficiency',
+		'showheaderfooter', 'merge', '|', 'pageBreak' ],
 	image: {
 		toolbar: [ 'imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight' ],
 		styles: [ 'full', 'alignLeft', 'alignRight' ]
+	},
+	indentBlock: {
+    	offset: 1,
+		unit: 'em'
 	},
 	table: {
 		contentToolbar: [
