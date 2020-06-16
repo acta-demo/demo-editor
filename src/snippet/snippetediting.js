@@ -45,8 +45,6 @@ export default class SnippetEditing extends Plugin {
 		const schema = this.editor.model.schema;
 
 		schema.register( 'snp', {
-			// Allow wherever text is allowed:
-
 			allowWhere: '$text',
 			allowContentOf: [ '$block', '$text' ],
 
@@ -54,10 +52,10 @@ export default class SnippetEditing extends Plugin {
 			isInline: true,
 
 			// The inline widget is self-contained so it cannot be split by the caret and it can be selected:
-			isObject: true,
-
+			// isObject: true,
+    		isLimit: true,
 			// The snp can have many types, like date, name, surname, etc:
-			allowAttributes: [ 'data-id', 'data-content', 'data-type', 'data-viewmode', 'data-language' ]
+			allowAttributes: [ 'data-id', 'data-type', 'data-viewmode', 'data-language' ]
 		} );
 
 	}
@@ -71,7 +69,7 @@ export default class SnippetEditing extends Plugin {
 				classes: 'snippet'
 			},
 			model: ( viewElement, modelWriter ) => {
-
+				console.log( '#### snp model conversion' );
 				const variableid = viewElement.getAttribute( 'data-id' );
 				const dataLanguage = viewElement.getAttribute( 'data-language' )
 					? viewElement.getAttribute( 'data-language' )
@@ -83,7 +81,8 @@ export default class SnippetEditing extends Plugin {
 					'data-type': 'snp',
 					'data-language': dataLanguage
 				} );
-
+				// modelWriter.appendText( '', modelElement );
+				// modelWriter.appendText( ' ', modelElement );
 				return modelElement;
 			}
 		} );
@@ -91,10 +90,16 @@ export default class SnippetEditing extends Plugin {
 		conversion.for( 'editingDowncast' ).elementToElement( {
 			model: 'snp',
 			view: ( modelItem, viewWriter ) => {
-				console.log( '#### elementToElement createSnpEditingView CALLED!' );
+				console.log( '#### createSnpEditingView CALLED!' );
 
 				console.log( '#### elementToElement editingDowncast modelItem:', modelItem );
 				const widgetElement = createSnpEditingView( modelItem, viewWriter );
+				const uiEndElement = viewWriter.createUIElement( 'span', { }, function( domDocument ) {
+                	const domElement = this.toDomElement( domDocument );
+                	domElement.innerHTML = '}';
+               		return domElement;
+				} );
+				viewWriter.insert( viewWriter.createPositionAt( widgetElement, 0 ), uiEndElement, 0 );
 				console.log( '#### elementToElement createSnpEditingView widgetElement:', widgetElement );
 				// return widgetElement;
 				// Enable widget handling on a placeholder element inside the editing view.
@@ -127,13 +132,13 @@ export default class SnippetEditing extends Plugin {
 		function createSnpEditingView( modelItem, viewWriter ) {
 
 			const variableId = modelItem.getAttribute( 'data-id' );
-			const dataLanguage = modelItem.getAttribute( 'data-language' )
+			const dataLanguage = ( modelItem.getAttribute( 'data-language' ) )
 				? modelItem.getAttribute( 'data-language' )
 				: 'en';
 			let snpView;
 			if ( SnippetEditing.viewmode === 'infoview' ) {
 				const _before = '{snp:' + variableId + ':';
-				const _after = '}';
+				const _after = '';
 				snpView = viewWriter.createContainerElement( 'div', {
 					class: 'snippet', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'snp',
 					'data-before': _before, 'data-after': _after, 'data-language': dataLanguage
@@ -149,17 +154,16 @@ export default class SnippetEditing extends Plugin {
 					'data-before': '', 'data-after': '', 'data-language': dataLanguage
 				} );
 			}
-
+			console.log( '####  createSnpEditingView snpView:', snpView );
 			return snpView;
 		}
 
 		function createSnpDataView( modelItem, viewWriter ) {
-
+			console.log( '#### createSnpDataView' );
 			const variableId = modelItem.getAttribute( 'data-id' );
 			const dataLanguage = modelItem.getAttribute( 'data-language' )
 				? modelItem.getAttribute( 'data-language' )
 				: 'en';
-			// const textcontent = modelItem.getAttribute('data-content');
 
 			const snpView = viewWriter.createContainerElement( 'span', {
 				class: 'snippet', 'data-id': variableId, 'data-type': 'snp', 'data-language': dataLanguage

@@ -1,6 +1,8 @@
 .snippet {
 	background-color: yellow;
 	display: inline-block;
+	margin-right: 1px;
+
 }
 
 .snippet_simpleview {
@@ -9,8 +11,6 @@
 
 .snippet_info {
 	background-color: yellow;
-	margin:0;
-	padding:0;
 }
 
 .snippet::before {
@@ -19,4 +19,8 @@
 
 .snippet::after {
 	content: attr(data-after);
+}
+
+h3 > div[data-type="snp"] {
+  margin-right: 2px;
 }

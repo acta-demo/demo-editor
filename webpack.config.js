@@ -65,7 +65,7 @@ module.exports = {
 				use: {
 					loader: 'babel-loader',
 					options: {
-						presets: [ [ '@babel/preset-env', { 'targets': { 'edge': '17', 'firefox': '60' } } ] ]
+						presets: [ [ '@babel/preset-env', { 'targets': { 'edge': '17' } } ] ]
 					}
 				}
 			},

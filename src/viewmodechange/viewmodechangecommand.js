@@ -265,7 +265,7 @@ export default class ViewModeChangeCommand extends Command {
 			_class = _class.replace( /\s\s+/g, ' ' );
 			viewWriter.setAttribute( 'class', _class, divelement );
 			viewWriter.setAttribute( 'data-before', '{snp:' + _id + ':', divelement );
-			viewWriter.setAttribute( 'data-after', '}', divelement );
+			viewWriter.setAttribute( 'data-after', '', divelement );
 		}
 
 		const childs = divelement.getChildren();
