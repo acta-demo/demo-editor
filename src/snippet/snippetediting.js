@@ -52,7 +52,7 @@ export default class SnippetEditing extends Plugin {
 			isInline: true,
 
 			// The inline widget is self-contained so it cannot be split by the caret and it can be selected:
-			// isObject: true,
+			isObject: true,
     		isLimit: true,
 			// The snp can have many types, like date, name, surname, etc:
 			allowAttributes: [ 'data-id', 'data-type', 'data-viewmode', 'data-language' ]

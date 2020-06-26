@@ -48,9 +48,14 @@ import DiffByEfficiency from './diffbyefficiency/diffbyefficiency';
 import ShowHeaderFooter from './showheaderfooter/showheaderfooter';
 import MergeContent from './mergecontent/mergecontent';
 
+import TrackChanges from '@ckeditor/ckeditor5-track-changes/src/trackchanges';
+import Comments from '@ckeditor/ckeditor5-comments/src/comments';
+
 import Element from '@ckeditor/ckeditor5-engine/src/model/element';
 import Text from '@ckeditor/ckeditor5-engine/src/model/text';
 
+// import SuggestionThreadView from '@ckeditor/ckeditor5-track-changes/src/ui/view/suggestionthreadview.js';
+import ActaSuggestionThreadView from './suggestion/actasuggestionthreadview';
 import './customcss/custom.css';
 
 /**
@@ -144,6 +149,69 @@ export default class MultirootEditor extends Editor {
 
 						return editor.data.init( initialData );
 					} )
+					.then( () => {
+						const trackChangesCommand = editor.commands.get( 'trackChanges' );
+						const trackChangesPlugin = editor.plugins.get( 'TrackChangesEditing' );
+						if ( trackChangesCommand ) {
+							console.log( '#### TRACK CHANGES trackChangesCommand:', trackChangesCommand );
+							trackChangesCommand.on( 'change:value', ( evt, data ) => {
+								if ( evt.source.value === true ) {
+									console.log( '#### this.trackChangesPlugin:', this.trackChangesPlugin );
+
+									/* trackChangesPlugin.enableCommand( 'viewmodechange', ( executeCommand, options ) => {
+										executeCommand;
+										console.log( '#### executeCommand:', executeCommand );
+									} );*/
+									trackChangesPlugin.enableCommand( 'viewmodechange' );
+									trackChangesPlugin.enableCommand( 'variableUpdate', ( executeCommand, options ) => { // Commands work on the current selection, so track changes
+										// integration also work on the current selection.
+										console.log( '#### variableUpdate options:', options );
+										console.log( '#### variableUpdate editor:', editor );
+										const range = editor.model.document.selection.getFirstRange();
+										console.log( '#### variableUpdate range:', range );
+										const _variable = range.start.nodeAfter;
+										console.log( '#### variableUpdate variable:', _variable );
+
+										// Get the current value of this property for given image.
+										const currentValue = _variable.hasAttribute( 'data-content' )
+											? _variable.getAttribute( 'data-content' )
+											: 'UNRESOLVED';
+										console.log( '#### variableUpdate currentValue:', currentValue );
+										// If there was no change, don't do anything.
+										if ( currentValue == options.value ) {
+											return;
+										}
+										console.log( '#### variableUpdate currentValue:', currentValue );
+										editor.model.change( writer => {
+											console.log( '####     MARKBLOCKFORMAT' );
+											// Set suggestion on the element
+											trackChangesPlugin.markInlineFormat(
+												range,
+												{
+													// Command to be executed when the suggestion is accepted.
+													commandName: 'variableUpdate',
+													// Parameters for the command.
+													commandParams: [ { 'value': options.value } ]
+												}
+											);
+
+											/* trackChangesPlugin.markInsertion(
+												range
+											);*/
+										} );
+										editor.editing.view.change( writer => {
+											const viewElement = editor.editing.view.document.selection.getSelectedElement();
+											console.log( '#### variableUpdate viewElement:', viewElement );
+										} );
+									} );
+									console.log( '#### TRACK CHANGES ENABLEd' );
+								} else {
+									console.log( '#### TRACK CHANGES DISABLED' );
+								}
+							} );
+						}
+
+					} )
 					.then( () => editor.fire( 'ready' ) )
 					.then( () => editor )
 			);
@@ -226,23 +294,25 @@ MultirootEditor.builtinPlugins = [
 	Alignment,
 	PageBreak,
 	Indent,
-	IndentBlock
+	IndentBlock,
+	TrackChanges,
+	Comments
 ];
 
 // Editor configuration.
 MultirootEditor.defaultConfig = {
 	plugins: [ Essentials, Paragraph, Heading, Alignment, Bold, Italic, List, Link, BlockQuote, Image, ImageCaption, PageBreak, Indent, IndentBlock,
 		ImageStyle, ImageToolbar, ImageUpload, Table, TableToolbar, TableProperties, TableCellProperties, MediaEmbed, EasyImage, StandardWord,
-		Snippet, Variable, ViewModeChange, ListOfSpeakers, Title, DiffByWord, DiffByEfficiency, ShowHeaderFooter, MergeContent ],
+		Snippet, Variable, ViewModeChange, ListOfSpeakers, Title, DiffByWord, DiffByEfficiency, ShowHeaderFooter, MergeContent, TrackChanges, Comments ],
 	toolbar: [ 'heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'bulletedList', '|', 'alignment:left', 'alignment:right',
 		'alignment:center', 'alignment:justify', '|', 'insertTable', 'undo', 'redo', 'viewmodechange', '|', 'diffbyword', 'diffbyefficiency',
-		'showheaderfooter', 'merge', '|', 'pageBreak' ],
+		'showheaderfooter', 'merge', '|', 'pageBreak', 'trackChanges', '|', 'comment' ],
 	image: {
-		toolbar: [ 'imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight' ],
+		toolbar: [ 'imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight', '|', 'comment' ],
 		styles: [ 'full', 'alignLeft', 'alignRight' ]
 	},
 	indentBlock: {
-    	offset: 1,
+		offset: 1,
 		unit: 'em'
 	},
 	table: {
@@ -264,5 +334,11 @@ MultirootEditor.defaultConfig = {
 			{ model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
 			{ model: 'heading3', view: 'h3', title: 'Header', class: 'ck-heading_heading3' }
 		]
+	},
+	licenseKey: 'LX875u4y61mbeXF0kt2rswfbNH8IZGEhf4QH3UQ8tAaN/zuH0+tbpqQ=',
+	trackChanges: {
+		'SuggestionThreadView': ActaSuggestionThreadView
 	}
+
 };
+

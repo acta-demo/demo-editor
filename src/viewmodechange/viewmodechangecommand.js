@@ -52,7 +52,9 @@ export default class ViewModeChangeCommand extends Command {
 							console.log( '#### ViewModeChangeCommand var_ inner_element:', inner_element );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
 							this.handlespanVarSp( inner_element, value );
-						} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ).startsWith( 'var_' ) ) {
+						} else if ( inner_element.name == 'span'
+							&& inner_element.getAttribute( 'data-type' )
+							&& inner_element.getAttribute( 'data-type' ).startsWith( 'var_' ) ) {
 							console.log( '#### ViewModeChangeCommand var_ inner_element:', inner_element );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
 							this.handlespanVar( inner_element, value );
@@ -106,7 +108,8 @@ export default class ViewModeChangeCommand extends Command {
 								console.log( '#### handleTable var_ inner_element:', inner_element );
 								viewWriter.setAttribute( 'data-viewmode', value, inner_element );
 								this.handlespanVarSp( inner_element, value );
-							} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' )
+							} else if ( inner_element.name == 'span'
+								&& inner_element.getAttribute( 'data-type' )
 								&& inner_element.getAttribute( 'data-type' ).startsWith( 'var_' ) ) {
 								console.log( '#### handleTable var_ inner_element:', inner_element );
 								viewWriter.setAttribute( 'data-viewmode', value, inner_element );
@@ -284,7 +287,9 @@ export default class ViewModeChangeCommand extends Command {
 				console.log( '#### element inside div:', element );
 				this.handlespanVarSp( element, viewmode );
 
-			} else if ( element instanceof Element && element.name === 'span' && element.getAttribute( 'data-type' ).startsWith( 'var_' ) ) {
+			} else if ( element instanceof Element && element.name === 'span'
+				&& element.getAttribute( 'data-type' )
+				&& element.getAttribute( 'data-type' ).startsWith( 'var_' ) ) {
 				console.log( '#### element inside div:', element );
 				this.handlespanVar( element, viewmode );
 

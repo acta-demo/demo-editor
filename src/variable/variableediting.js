@@ -2,6 +2,7 @@ import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import { toWidget, viewToModelPositionOutsideModelElement } from '@ckeditor/ckeditor5-widget/src/utils';
 import Widget from '@ckeditor/ckeditor5-widget/src/widget';
 import VariableCommand from './variablecommand';
+import VariableUpdateCommand from './variableupdatecommand';
 import Util from '../utils/Util';
 import './css/variable.css';
 import format from 'date-fns/format';
@@ -29,6 +30,7 @@ export default class VariableEditing extends Plugin {
 		this._defineConverters();
 
 		this.editor.commands.add( 'variable', new VariableCommand( this.editor ) );
+		this.editor.commands.add( 'variableUpdate', new VariableUpdateCommand( this.editor ) );
 
 		this.editor.editing.mapper.on(
 			'viewToModelPosition',

@@ -156,7 +156,7 @@ export default class StandardWordEditing extends Plugin {
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( strView, 0 ), innerText );
 			}
-			console.log( '#### createStrEditingView strView:', strView );
+
 			return strView;
 		}
 
