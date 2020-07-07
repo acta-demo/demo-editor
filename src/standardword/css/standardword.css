@@ -2,6 +2,10 @@
 	color: red;
 }
 
+.standardword.standardword_simpleview {
+	color: black;
+}
+
 .removetextcolor {
 	text-decoration: none;
 }

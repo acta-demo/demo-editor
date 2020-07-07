@@ -54,6 +54,11 @@ import Comments from '@ckeditor/ckeditor5-comments/src/comments';
 import Element from '@ckeditor/ckeditor5-engine/src/model/element';
 import Text from '@ckeditor/ckeditor5-engine/src/model/text';
 
+import ViewElement from '@ckeditor/ckeditor5-engine/src/view/element';
+import ViewText from '@ckeditor/ckeditor5-engine/src/view/text';
+
+import Util from './utils/Util';
+
 // import SuggestionThreadView from '@ckeditor/ckeditor5-track-changes/src/ui/view/suggestionthreadview.js';
 import ActaSuggestionThreadView from './suggestion/actasuggestionthreadview';
 import './customcss/custom.css';
@@ -169,7 +174,9 @@ export default class MultirootEditor extends Editor {
 										console.log( '#### variableUpdate editor:', editor );
 										const range = editor.model.document.selection.getFirstRange();
 										console.log( '#### variableUpdate range:', range );
-										const _variable = range.start.nodeAfter;
+										const _variable = ( range && range.start && range.start.nodeAfter )
+											? range.start.nodeAfter
+											: Util.selectedElement;
 										console.log( '#### variableUpdate variable:', _variable );
 
 										// Get the current value of this property for given image.
@@ -183,25 +190,103 @@ export default class MultirootEditor extends Editor {
 										}
 										console.log( '#### variableUpdate currentValue:', currentValue );
 										editor.model.change( writer => {
+											writer.setSelection( _variable, 'on' );
+											const _range = editor.model.document.selection.getFirstRange();
 											console.log( '####     MARKBLOCKFORMAT' );
+											writer.setAttribute( 'data-suggestion-new-value', options.value, _variable );
 											// Set suggestion on the element
 											trackChangesPlugin.markInlineFormat(
-												range,
+												_range,
 												{
 													// Command to be executed when the suggestion is accepted.
 													commandName: 'variableUpdate',
 													// Parameters for the command.
-													commandParams: [ { 'value': options.value } ]
+													commandParams: [ { 'value': options.value, currentValue } ]
 												}
 											);
 
-											/* trackChangesPlugin.markInsertion(
-												range
-											);*/
 										} );
-										editor.editing.view.change( writer => {
-											const viewElement = editor.editing.view.document.selection.getSelectedElement();
-											console.log( '#### variableUpdate viewElement:', viewElement );
+									} );
+									trackChangesPlugin.enableCommand( 'titleUpdate', ( executeCommand, options ) => { // Commands work on the current selection, so track changes
+										// integration also work on the current selection.
+										console.log( '#### titleUpdate options:', options );
+										console.log( '#### titleUpdate editor:', editor );
+										const range = editor.model.document.selection.getFirstRange();
+										console.log( '#### titleUpdate range:', range );
+										const _title = ( range && range.start && range.start.nodeAfter )
+											? range.start.nodeAfter
+											: Util.selectedElement;
+										console.log( '#### titleUpdate variable:', _title );
+
+										// Get the current value of this property for given image.
+										const currentValue = _title.hasAttribute( 'data-content' )
+											? _title.getAttribute( 'data-content' )
+											: 'UNRESOLVED';
+										console.log( '#### titleUpdate currentValue:', currentValue );
+										// If there was no change, don't do anything.
+										if ( currentValue == options.value ) {
+											return;
+										}
+										console.log( '#### titleUpdate currentValue:', currentValue );
+										editor.model.change( writer => {
+											writer.setSelection( _title, 'on' );
+											const _range = editor.model.document.selection.getFirstRange();
+											console.log( '####     MARKBLOCKFORMAT' );
+											writer.setAttribute( 'data-suggestion-new-value', options.value, _title );
+											// Set suggestion on the element
+											trackChangesPlugin.markInlineFormat(
+												_range,
+												{
+													// Command to be executed when the suggestion is accepted.
+													commandName: 'variableUpdate',
+													// Parameters for the command.
+													commandParams: [ { 'value': options.value, 'currentValue': options.currentValue, 'dataJson': options.dataJson } ]
+												}
+											);
+
+										} );
+									} );
+									trackChangesPlugin.enableCommand( 'lspUpdate', ( executeCommand, options ) => { // Commands work on the current selection, so track changes
+										// integration also work on the current selection.
+										console.log( '#### lspUpdate options:', options );
+										console.log( '#### lspUpdate editor:', editor );
+
+										const range = editor.model.document.selection.getFirstRange();
+										console.log( '#### lspUpdate range:', range );
+										console.log( '#### editor.model.document.selection.getSelectedElement():',
+											editor.model.document.selection.getSelectedElement() );
+										const _lsp = ( range && range.start && range.start.nodeAfter )
+											? range.start.nodeAfter
+											: Util.selectedElement;
+										console.log( '#### lspUpdate variable:', _lsp );
+										console.log( '#### lspUpdate _lsp.hasAttribute( data-content ):', _lsp.hasAttribute( 'data-content' ) );
+
+										// Get the current value of this property for given image.
+										const currentValue = _lsp.hasAttribute( 'data-content' )
+											? _lsp.getAttribute( 'data-content' )
+											: 'UNRESOLVED';
+										console.log( '#### lspUpdate currentValue:', currentValue );
+										// If there was no change, don't do anything.
+										if ( currentValue == options.value ) {
+											return;
+										}
+										editor.model.change( writer => {
+											writer.setSelection( _lsp, 'on' );
+											const _range = editor.model.document.selection.getFirstRange();
+
+											console.log( '####     MARKBLOCKFORMAT _range:', _range );
+											writer.setAttribute( 'data-suggestion-new-value', options.value, _lsp );
+											// Set suggestion on the element
+											trackChangesPlugin.markInlineFormat(
+												_range,
+												{
+													// Command to be executed when the suggestion is accepted.
+													commandName: 'lspUpdate',
+													// Parameters for the command.
+													commandParams: [ { 'value': options.value, 'currentValue': options.currentValue, 'dataJson': options.dataJson } ]
+												}
+											);
+
 										} );
 									} );
 									console.log( '#### TRACK CHANGES ENABLEd' );
@@ -213,6 +298,16 @@ export default class MultirootEditor extends Editor {
 
 					} )
 					.then( () => editor.fire( 'ready' ) )
+					.then( () => {
+						editor.listenTo( editor.editing.view.document, 'mousedown', ( evt, data ) => {
+							const modelElement = editor.editing.mapper.toModelElement( data.target );
+							Util.selectedElement = modelElement;
+						} );
+						editor.listenTo( editor.editing.view.document, 'keydown', ( evt, data ) => {
+							const modelElement = editor.editing.mapper.toModelElement( data.target );
+							Util.selectedElement = modelElement;
+						} );
+					} )
 					.then( () => editor )
 			);
 
@@ -235,6 +330,20 @@ export default class MultirootEditor extends Editor {
 		return false;
 	}
 
+	static isViewText( obj ) {
+		if ( obj instanceof ViewText ) {
+			return true;
+		}
+		return false;
+	}
+
+	static isViewElement( obj ) {
+		if ( obj instanceof ViewElement ) {
+			return true;
+		}
+		return false;
+	}
+
 	static disableAllKeyboard( editor ) {
 		editor.commands.get( 'input' ).forceDisabled( 'input' );
 		editor.commands.get( 'delete' ).forceDisabled( 'delete' );
@@ -249,6 +358,14 @@ export default class MultirootEditor extends Editor {
 		editor.commands.get( 'enter' ).clearForceDisabled( 'enter' );
 		editor.commands.get( 'forwardDelete' ).clearForceDisabled( 'forwardDelete' );
 		editor.commands.get( 'shiftEnter' ).clearForceDisabled( 'shiftEnter' );
+	}
+
+	static getDate( date, language ) {
+		return Util.getDate( date );
+	}
+
+	static getTime( time, language ) {
+		return Util.getTime( time );
 	}
 
 }

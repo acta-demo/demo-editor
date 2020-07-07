@@ -1,25 +1,38 @@
 .snippet {
 	background-color: yellow;
-	display: inline-block;
+	display: inline;
 	margin-right: 1px;
-
 }
 
 .snippet_simpleview {
-	display: inline-block;
+	background-color: none;
+	display: inline;
+	margin-right: 1px;
 }
 
-.snippet_info {
+.snippet.snippet_simpleview {
+	background-color: transparent;
+	display: inline;
+	margin-right: 1px;
+}
+
+.snippet_info::before {
 	background-color: yellow;
+	content: attr(data-before);
+}
+
+.snippet_info::after {
+	background-color: yellow;
+	content: attr(data-after);
 }
 
 .snippet::before {
 	content: attr(data-before);
 }
 
-.snippet::after {
+/*.snippet::after {
 	content: attr(data-after);
-}
+}*/
 
 h3 > div[data-type="snp"] {
   margin-right: 2px;

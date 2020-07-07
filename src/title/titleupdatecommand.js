@@ -1,8 +1,8 @@
 import Command from '@ckeditor/ckeditor5-core/src/command';
 import Util from '../utils/Util';
 
-export default class VariableUpdateCommand extends Command {
-	execute( { value, currentValue } ) {
+export default class TitleUpdateCommand extends Command {
+	execute( { value, currentValue, dataJson } ) {
 		console.log( '#### VariableUpdateCommand value:', value );
 		const editor = this.editor;
 		const modelElement = editor.model.document.selection.getSelectedElement()
@@ -15,6 +15,11 @@ export default class VariableUpdateCommand extends Command {
 			writer.setAttribute(
 				'data-content',
 				value,
+				modelElement
+			);
+			writer.setAttribute(
+				'data-json',
+				dataJson,
 				modelElement
 			);
 

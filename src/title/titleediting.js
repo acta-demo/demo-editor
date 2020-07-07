@@ -2,6 +2,7 @@ import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import { toWidget, viewToModelPositionOutsideModelElement } from '@ckeditor/ckeditor5-widget/src/utils';
 import Widget from '@ckeditor/ckeditor5-widget/src/widget';
 import TitleCommand from './titlecommand';
+import TitleUpdateCommand from './titleupdatecommand';
 import Util from '../utils/Util';
 import './css/title.css';
 
@@ -26,6 +27,7 @@ export default class TitleEditing extends Plugin {
 		this._defineConverters();
 
 		this.editor.commands.add( 'title', new TitleCommand( this.editor ) );
+		this.editor.commands.add( 'titleUpdate', new TitleUpdateCommand( this.editor ) );
 
 		this.editor.editing.mapper.on(
 			'viewToModelPosition',
@@ -52,7 +54,7 @@ export default class TitleEditing extends Plugin {
 			isObject: true,
 
 			// The variable can have many types, like date, name, surname, etc:
-			allowAttributes: [ 'data-id', 'data-content', 'data-viewmode', 'data-type', 'data-json' ]
+			allowAttributes: [ 'data-id', 'data-content', 'data-viewmode', 'data-type', 'data-json', 'data-suggestion-new-value' ]
 		} );
 	}
 
@@ -70,13 +72,18 @@ export default class TitleEditing extends Plugin {
 				const dataType = viewElement.getAttribute( 'data-type' );
 				const dataJson = viewElement.getAttribute( 'data-json' );
 				const _text = viewElement.getChild( 0 );
+				const suggestionNewValue = ( viewElement.getAttribute( 'data-suggestion-new-value' )
+											&& viewElement.getAttribute( 'data-suggestion-new-value' ) != '' )
+					? viewElement.getAttribute( 'data-suggestion-new-value' )
+					: '';
 
 				const modelElement = modelWriter.createElement( 'title', {
 					'data-id': variableid,
 					'data-content': Util.encodeHTML( _text.data ),
 					'data-viewmode': TitleEditing.viewmode,
 					'data-type': dataType,
-					'data-json': dataJson
+					'data-json': dataJson,
+					'data-suggestion-new-value': suggestionNewValue
 				} );
 				console.log( '#### upcast title modelElement:', modelElement );
 				return modelElement;
@@ -164,9 +171,14 @@ export default class TitleEditing extends Plugin {
 			const dataType = modelItem.getAttribute( 'data-type' );
 			const dataJson = modelItem.getAttribute( 'data-json' );
 			const textcontent = modelItem.getAttribute( 'data-content' );
+			const suggestionNewValue = ( modelItem.getAttribute( 'data-suggestion-new-value' )
+			&& modelItem.getAttribute( 'data-suggestion-new-value' ) != '' )
+				? modelItem.getAttribute( 'data-suggestion-new-value' )
+				: '';
 
 			const varView = viewWriter.createContainerElement( 'span', {
-				class: 'title', 'data-id': variableId, 'data-type': dataType, 'data-json': dataJson, 'data-content': textcontent
+				class: 'title', 'data-id': variableId, 'data-type': dataType, 'data-json': dataJson,
+				'data-content': textcontent, 'data-suggestion-new-value': suggestionNewValue
 			} );
 
 			// Insert the title (as a text).
@@ -183,23 +195,30 @@ export default class TitleEditing extends Plugin {
 			const dataType = modelItem.getAttribute( 'data-type' );
 			const dataJson = modelItem.getAttribute( 'data-json' );
 			const textcontent = modelItem.getAttribute( 'data-content' );
+			const suggestionNewValue = ( modelItem.getAttribute( 'data-suggestion-new-value' )
+			&& modelItem.getAttribute( 'data-suggestion-new-value' ) != '' )
+				? modelItem.getAttribute( 'data-suggestion-new-value' )
+				: '';
 			let varView;
 			if ( TitleEditing.viewmode === 'infoview' ) {
 				console.log( '#### createTitleEditingView 2' );
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'title', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'title', 'data-json': dataJson
+					class: 'title', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'title',
+					'data-json': dataJson, 'data-suggestion-new-value': suggestionNewValue
 				} );
 				const innerText = viewWriter.createText( '{' + dataType + ':' + variableId + ':' + Util.decodeHTML( textcontent ) + '}' );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( TitleEditing.viewmode === 'coloredview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'title', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'title', 'data-json': dataJson
+					class: 'title', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'title',
+					'data-json': dataJson, 'data-suggestion-new-value': suggestionNewValue
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( TitleEditing.viewmode === 'simpleview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'title', 'data-json': dataJson
+					class: 'title title_simpleview', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'title',
+					'data-json': dataJson, 'data-suggestion-new-value': suggestionNewValue
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );

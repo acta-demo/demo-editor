@@ -1,3 +1,34 @@
 .variable {
 	color: blue;
 }
+
+.variable.variable_simpleview {
+	color: black;
+}
+
+.ck-suggestion-marker-formatInline::after {
+	background-color: rgb(202, 246, 208);
+	content: attr(data-suggestion-new-value);
+} 
+
+.ck-suggestion-marker-formatInline {
+	border: 1px solid !important;
+}
+
+.ck-suggestion-marker-formatInline {
+	border-top: 1px solid var(--ck-color-suggestion-marker-format-border) !important;
+	border-bottom: 1px solid var(--ck-color-suggestion-marker-format-border) !important;
+
+	&.ck-suggestion-marker--active {
+		border-color: var(--ck-color-suggestion-marker-format-border-active);
+	}
+
+	&.ck-widget {
+		background: none;
+		border: 1px solid var(--ck-color-suggestion-marker-format-border) !important;
+
+		&.ck-suggestion-marker--active {
+			border-color: var(--ck-color-suggestion-marker-format-border-active);
+		}
+	}
+}

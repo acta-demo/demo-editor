@@ -5,11 +5,21 @@ export default class ActaSuggestionThreadView extends SuggestionThreadView {
 	constructor( ...args ) {
 		super( ...args );
 		console.log( '#### args:', args );
-		console.log( '#### THIS:', this );
-		this.discardButton.on( 'execute', ( evt, data ) => {
-			console.log( '#### EXECUTE DISCARD' );
-		} );
 		const suggestionThreadView = this;
+
+		/* this.discardButton.on( 'execute', ( evt, data ) => {
+			console.log( '#### EXECUTE DISCARD' );
+			if ( suggestionThreadView._model
+				&& suggestionThreadView._model.data
+				&& suggestionThreadView._model.data.commandName
+				&& suggestionThreadView._model.data.commandName == 'variableUpdate' ) {
+				console.log( '#### suggestionThreadView VARIABLEUPDATE DISCARD' );
+				const value = suggestionThreadView._model.data.commandParams[ 0 ].value;
+				const currentValue = suggestionThreadView._model.data.commandParams[ 0 ].currentValue;
+
+			}
+
+		} );*/
 		const templateDefinition = {
 			tag: 'div',
 
@@ -109,18 +119,50 @@ export default class ActaSuggestionThreadView extends SuggestionThreadView {
 										{
 											text: this._bindTemplate.to( 'descriptionParts', value => {
 												// this._config.formatDateTime( value );
-												console.log( '#### value:', value );
-												console.log( '#### suggestionThreadView:', suggestionThreadView );
+												console.log( '#### descriptionParts value:', value );
+												console.log( '#### descriptionParts suggestionThreadView:', suggestionThreadView );
 												if ( suggestionThreadView._model
 													&& suggestionThreadView._model.data
 													&& suggestionThreadView._model.data.commandName
-													&& suggestionThreadView._model.data.commandName == 'variableUpdate' ) {
+													&& ( suggestionThreadView._model.data.commandName == 'variableUpdate'
+														|| suggestionThreadView._model.data.commandName == 'titleUpdate'
+														|| suggestionThreadView._model.data.commandName == 'lspUpdate' ) ) {
 													console.log( '#### suggestionThreadView VARIABLEUPDATE' );
 													const newValue = suggestionThreadView._model.data.commandParams[ 0 ].value;
-													// suggestionThreadView.descriptionParts[ 0 ].type = 'replace';
-													// suggestionThreadView.descriptionParts[ 0 ].content = 'New value: ' + newValue;
-													suggestionThreadView.description = '<p><span class=\"ck-suggestion-type\">Replace with:</span> '
-														+ newValue + '</p>';
+													const currentValue = suggestionThreadView._model.data.commandParams[ 0 ].currentValue;
+													suggestionThreadView.description = '<p><span class=\"ck-suggestion-type\">Value updated</span> '
+														+ '<br/>New value: ' + newValue
+														+ '<br/>Old value: ' + currentValue + '</p>';
+												} else if ( value[ 0 ] && value[ 0 ].content && value[ 0 ].content == '*Insert:* lsp' ) {
+													suggestionThreadView.description =
+															'<p><span class=\"ck-suggestion-type\">Insert new list of speakers variable</span> ';
+												} else if ( value[ 0 ] && value[ 0 ].content && value[ 0 ].content == '*Insert:* variable' ) {
+													suggestionThreadView.description =
+															'<p><span class=\"ck-suggestion-type\">Insert new variable</span> ';
+												} else if ( value[ 0 ] && value[ 0 ].content && value[ 0 ].content == '*Insert:* title' ) {
+													suggestionThreadView.description =
+															'<p><span class=\"ck-suggestion-type\">Insert new title</span> ';
+												} else if ( value[ 0 ] && value[ 0 ].content && value[ 0 ].content == '*Insert:* str' ) {
+													suggestionThreadView.description =
+															'<p><span class=\"ck-suggestion-type\">Insert new string</span> ';
+												} else if ( value[ 0 ] && value[ 0 ].content && value[ 0 ].content == '*Insert:* snp' ) {
+													suggestionThreadView.description =
+															'<p><span class=\"ck-suggestion-type\">Insert new snippet</span> ';
+												} else if ( value[ 0 ] && value[ 0 ].content && value[ 0 ].content == '*Remove:* lsp' ) {
+													suggestionThreadView.description =
+															'<p><span class=\"ck-suggestion-type\">Remove list of speakers variable</span> ';
+												} else if ( value[ 0 ] && value[ 0 ].content && value[ 0 ].content == '*Remove:* variable' ) {
+													suggestionThreadView.description =
+															'<p><span class=\"ck-suggestion-type\">Remove variable</span> ';
+												} else if ( value[ 0 ] && value[ 0 ].content && value[ 0 ].content == '*Remove:* title' ) {
+													suggestionThreadView.description =
+															'<p><span class=\"ck-suggestion-type\">Remove title</span> ';
+												} else if ( value[ 0 ] && value[ 0 ].content && value[ 0 ].content == '*Remove:* str' ) {
+													suggestionThreadView.description =
+															'<p><span class=\"ck-suggestion-type\">Remove string</span> ';
+												} else if ( value[ 0 ] && value[ 0 ].content && value[ 0 ].content == '*Remove:* snp' ) {
+													suggestionThreadView.description =
+															'<p><span class=\"ck-suggestion-type\">Remove snippet</span> ';
 												}
 											} )
 										}

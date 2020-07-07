@@ -2,6 +2,7 @@ import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import { toWidget, viewToModelPositionOutsideModelElement } from '@ckeditor/ckeditor5-widget/src/utils';
 import Widget from '@ckeditor/ckeditor5-widget/src/widget';
 import ListOfSpeakersCommand from './listofspeakerscommand';
+import ListOfSpeakersUpdateCommand from './listofspeakersupdatecommand';
 import Util from '../utils/Util';
 import './css/listofspeakers.css';
 
@@ -26,6 +27,7 @@ export default class ListOfSpeakersEditing extends Plugin {
 		this._defineConverters();
 
 		this.editor.commands.add( 'lsp', new ListOfSpeakersCommand( this.editor ) );
+		this.editor.commands.add( 'lspUpdate', new ListOfSpeakersUpdateCommand( this.editor ) );
 
 		this.editor.editing.mapper.on(
 			'viewToModelPosition',
@@ -52,7 +54,7 @@ export default class ListOfSpeakersEditing extends Plugin {
 			isObject: true,
 
 			// The variable can have many types, like date, name, surname, etc:
-			allowAttributes: [ 'data-id', 'data-content', 'data-viewmode', 'data-type', 'data-json', 'data-language' ]
+			allowAttributes: [ 'data-id', 'data-content', 'data-viewmode', 'data-type', 'data-json', 'data-language', 'data-suggestion-new-value' ]
 		} );
 	}
 
@@ -73,6 +75,10 @@ export default class ListOfSpeakersEditing extends Plugin {
 					: 'en';
 				const dataJson = viewElement.getAttribute( 'data-json' ) ? viewElement.getAttribute( 'data-json' ) : '';
 				const _text = viewElement.getChild( 0 );
+				const suggestionNewValue = ( viewElement.getAttribute( 'data-suggestion-new-value' )
+											&& viewElement.getAttribute( 'data-suggestion-new-value' ) != '' )
+					? viewElement.getAttribute( 'data-suggestion-new-value' )
+					: '';
 
 				const modelElement = modelWriter.createElement( 'lsp', {
 					'data-id': variableid,
@@ -80,7 +86,8 @@ export default class ListOfSpeakersEditing extends Plugin {
 					'data-viewmode': ListOfSpeakersEditing.viewmode,
 					'data-type': dataType,
 					'data-json': dataJson,
-					'data-language': dataLanguage
+					'data-language': dataLanguage,
+					'data-suggestion-new-value': suggestionNewValue
 				} );
 				console.log( '#### upcast lsp modelElement:', modelElement );
 				return modelElement;
@@ -169,10 +176,14 @@ export default class ListOfSpeakersEditing extends Plugin {
 				: 'en';
 			const dataJson = modelItem.getAttribute( 'data-json' ) ? modelItem.getAttribute( 'data-json' ) : '';
 			const textcontent = modelItem.getAttribute( 'data-content' );
+			const suggestionNewValue = ( modelItem.getAttribute( 'data-suggestion-new-value' )
+			&& modelItem.getAttribute( 'data-suggestion-new-value' ) != '' )
+				? modelItem.getAttribute( 'data-suggestion-new-value' )
+				: '';
 
 			const varView = viewWriter.createContainerElement( 'span', {
 				class: 'lsp', 'data-id': variableId, 'data-type': dataType, 'data-json': dataJson,
-				'data-content': textcontent, 'data-language': dataLanguage
+				'data-content': textcontent, 'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 			} );
 
 			// Insert the lsp (as a text).
@@ -192,26 +203,31 @@ export default class ListOfSpeakersEditing extends Plugin {
 				: 'en';
 			const dataJson = modelItem.getAttribute( 'data-json' ) ? modelItem.getAttribute( 'data-json' ) : '';
 			const textcontent = modelItem.getAttribute( 'data-content' );
+			const suggestionNewValue = ( modelItem.getAttribute( 'data-suggestion-new-value' )
+			&& modelItem.getAttribute( 'data-suggestion-new-value' ) != '' )
+				? modelItem.getAttribute( 'data-suggestion-new-value' )
+				: '';
+
 			let varView;
 			if ( ListOfSpeakersEditing.viewmode === 'infoview' ) {
 				console.log( '#### createVariableLspEditingView 2' );
 				varView = viewWriter.createContainerElement( 'span', {
 					class: 'lsp', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_sp',
-					'data-json': dataJson, 'data-language': dataLanguage
+					'data-json': dataJson, 'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 				} );
 				const innerText = viewWriter.createText( '{' + dataType + ':' + variableId + ':' + Util.decodeHTML( textcontent ) + '}' );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( ListOfSpeakersEditing.viewmode === 'coloredview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
 					class: 'lsp', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'var_sp',
-					'data-json': dataJson, 'data-language': dataLanguage
+					'data-json': dataJson, 'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( ListOfSpeakersEditing.viewmode === 'simpleview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_sp',
-					'data-json': dataJson, 'data-language': dataLanguage
+					class: 'lsp lsp_simpleview', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_sp',
+					'data-json': dataJson, 'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );

@@ -1,3 +1,7 @@
 .lsp {
 	color: blue;
 }
+
+.lsp.lsp_simpleview {
+	color: black;
+}

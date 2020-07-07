@@ -60,7 +60,7 @@ export default class VariableEditing extends Plugin {
 			isObject: true,
 
 			// The variable can have many types, like date, name, surname, etc:
-			allowAttributes: [ 'data-id', 'data-content', 'data-viewmode', 'data-type', 'data-language' ]
+			allowAttributes: [ 'data-id', 'data-content', 'data-viewmode', 'data-type', 'data-language', 'data-suggestion-new-value' ]
 		} );
 	}
 
@@ -79,6 +79,10 @@ export default class VariableEditing extends Plugin {
 				const dataLanguage = viewElement.getAttribute( 'data-language' )
 					? viewElement.getAttribute( 'data-language' )
 					: 'en';
+				const suggestionNewValue = ( viewElement.getAttribute( 'data-suggestion-new-value' )
+											&& viewElement.getAttribute( 'data-suggestion-new-value' ) != '' )
+					? viewElement.getAttribute( 'data-suggestion-new-value' )
+					: '';
 				const _text = viewElement.getChild( 0 );
 
 				const modelElement = modelWriter.createElement( 'variable', {
@@ -86,7 +90,8 @@ export default class VariableEditing extends Plugin {
 					'data-content': Util.encodeHTML( _text.data ),
 					'data-viewmode': VariableEditing.viewmode,
 					'data-type': dataType,
-					'data-language': dataLanguage
+					'data-language': dataLanguage,
+					'data-suggestion-new-value': suggestionNewValue
 				} );
 				console.log( '#### upcast variable modelElement:', modelElement );
 				return modelElement;
@@ -112,11 +117,11 @@ export default class VariableEditing extends Plugin {
 				if ( modelItem.getAttribute( 'data-type' ) === 'var_date' ) {
 					dataContent = modelItem.getAttribute( 'data-content' ) === 'UNRESOLVED'
 						? 'UNRESOLVED'
-						: getDate( modelItem.getAttribute( 'data-content' ), dataLanguage );
+						: Util.getDate( modelItem.getAttribute( 'data-content' ), dataLanguage );
 				} else if ( modelItem.getAttribute( 'data-type' ) === 'var_time' ) {
 					dataContent = modelItem.getAttribute( 'data-content' ) === 'UNRESOLVED'
 						? 'UNRESOLVED'
-						: getTime( modelItem.getAttribute( 'data-content' ), dataLanguage );
+						: Util.getTime( modelItem.getAttribute( 'data-content' ), dataLanguage );
 				} else {
 					dataContent = modelItem.getAttribute( 'data-content' );
 				}
@@ -140,7 +145,7 @@ export default class VariableEditing extends Plugin {
 
 				// Bind the newly created view element to model element so positions will map accordingly in future.
 				conversionApi.mapper.bindElements( modelItem, widgetElement );
-
+				console.log( '#### editingDowncast attr widgetElement:', widgetElement );
 				// Add the newly created view element to the view.
 				// conversionApi.writer.insert(viewPosition, widgetElement);
 
@@ -197,9 +202,14 @@ export default class VariableEditing extends Plugin {
 			const dataLanguage = modelItem.getAttribute( 'data-language' )
 				? modelItem.getAttribute( 'data-language' )
 				: 'en';
-
+			const suggestionNewValue = ( modelItem.getAttribute( 'data-suggestion-new-value' )
+			&& modelItem.getAttribute( 'data-suggestion-new-value' ) != '' )
+				? modelItem.getAttribute( 'data-suggestion-new-value' )
+				: '';
+			console.log( '#### suggestionNewValue:', suggestionNewValue );
 			const varView = viewWriter.createContainerElement( 'span', {
-				class: 'variable', 'data-id': variableId, 'data-type': dataType, 'data-content': textcontent, 'data-language': dataLanguage
+				class: 'variable', 'data-id': variableId, 'data-type': dataType, 'data-content': textcontent,
+				'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 			} );
 
 			// Insert the variable (as a text).
@@ -210,38 +220,6 @@ export default class VariableEditing extends Plugin {
 			return varView;
 		}
 
-		function getDate( dataContent, language ) {
-			let dateValue = 'UNRESOLVED';
-			const patt = new RegExp( '^[0-9]{4}[.\/-]([0-9]{2}|[0-9]{1})[.\/-]([0-9]{2}|[0-9]{1})$' );
-			if ( patt.test( dataContent ) ) {
-				const localeObj = ( language == 'de' ) ? { locale: de } : { locale: enUS };
-				const dateArr = dataContent.split( '/' );
-				console.log( '#### getDate dateArr:', dateArr );
-				dateValue = format( new Date( parseInt( dateArr[ 0 ] ), parseInt( dateArr[ 1 ] ) - 1, parseInt( dateArr[ 2 ] ) ),
-					'EEEE, d MMMM yyyy', localeObj );
-				console.log( '#### createVariableDateEditingView dateValue:', dateValue );
-			}
-			return dateValue;
-		}
-
-		function getTime( dataContent, language ) {
-			let timeValue = 'UNRESOLVED';
-			const patt = new RegExp( '^([0-9]{2}|[0-9]{1})[.\:-]([0-9]{2}|[0-9]{1})$' );
-			if ( patt.test( dataContent ) ) {
-				const timeArr = dataContent.split( ':' );
-				const hours = timeArr[ 0 ].length === 1
-					? '0' + timeArr[ 0 ]
-					: timeArr[ 0 ];
-				const minutes = timeArr[ 1 ].length === 1
-					? '0' + timeArr[ 1 ]
-					: timeArr[ 1 ];
-				timeValue = ( language == 'de' ) ? hours + ':' + minutes + ' Uhr' : hours + ':' + minutes;
-				console.log( '#### getTime timeArr:', timeArr );
-				console.log( '#### getTime timeValue:', timeValue );
-			}
-			return timeValue;
-		}
-
 		function createVariableDateEditingView( modelItem, viewWriter ) {
 			console.log( '#### createVariableDateEditingView 1' );
 			const variableId = modelItem.getAttribute( 'data-id' );
@@ -249,26 +227,39 @@ export default class VariableEditing extends Plugin {
 			const dataLanguage = modelItem.getAttribute( 'data-language' )
 				? modelItem.getAttribute( 'data-language' )
 				: 'en';
+			const suggestionNewValue = ( modelItem.getAttribute( 'data-suggestion-new-value' )
+			&& modelItem.getAttribute( 'data-suggestion-new-value' ) != '' )
+				? modelItem.getAttribute( 'data-suggestion-new-value' )
+				: '';
+
+			/* const suggestionNewValue = ( modelItem.getAttribute( 'data-suggestion-new-value' )
+			&& modelItem.getAttribute( 'data-suggestion-new-value' ) != '' )
+				? modelItem.getAttribute( 'data-suggestion-new-value' )
+				: '';*/
+			console.log( '#### EDITING modelItem.getAttribute( data-suggestion-new-value ):', modelItem.getAttribute( 'data-suggestion-new-value' ) );
 			const textcontent = modelItem.getAttribute( 'data-content' );
 			let varView;
 			if ( VariableEditing.viewmode === 'infoview' ) {
 				console.log( '#### createVariableDateEditingView 2' );
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'variable', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_date', 'data-language': dataLanguage
+					class: 'variable', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_date',
+					'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 				} );
-				const innerText = viewWriter.createText( '{' + dataType + ':' + variableId + ':' + Util.decodeHTML( getDate( textcontent ) ) + '}' );
+				const innerText = viewWriter.createText( '{' + dataType + ':' + variableId + ':' + Util.decodeHTML( Util.getDate( textcontent ) ) + '}' );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( VariableEditing.viewmode === 'coloredview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'variable', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'var_date', 'data-language': dataLanguage
+					class: 'variable', 'data-id': variableId, 'data-viewmode': 'coloredview',
+					'data-type': 'var_date', 'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 				} );
-				const innerText = viewWriter.createText( Util.decodeHTML( getDate( textcontent ) ) );
+				const innerText = viewWriter.createText( Util.decodeHTML( Util.getDate( textcontent ) ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( VariableEditing.viewmode === 'simpleview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_date', 'data-language': dataLanguage
+					class: 'variable variable_simpleview', 'data-id': variableId, 'data-viewmode': 'simpleview',
+					'data-type': 'var_date', 'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 				} );
-				const innerText = viewWriter.createText( Util.decodeHTML( getDate( textcontent ) ) );
+				const innerText = viewWriter.createText( Util.decodeHTML( Util.getDate( textcontent ) ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			}
 			console.log( '#### createVariableDateEditingView varView:', varView );
@@ -282,23 +273,31 @@ export default class VariableEditing extends Plugin {
 			const dataLanguage = modelItem.getAttribute( 'data-language' )
 				? modelItem.getAttribute( 'data-language' )
 				: 'en';
+			const suggestionNewValue = ( modelItem.getAttribute( 'data-suggestion-new-value' )
+			&& modelItem.getAttribute( 'data-suggestion-new-value' ) != '' )
+				? modelItem.getAttribute( 'data-suggestion-new-value' )
+				: '';
+			console.log( '#### EDITING suggestionNewValue:', suggestionNewValue );
 			const textcontent = modelItem.getAttribute( 'data-content' );
 			let varView;
 			if ( VariableEditing.viewmode === 'infoview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'variable', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_time', 'data-language': dataLanguage
+					class: 'variable', 'data-id': variableId, 'data-viewmode': 'infoview',
+					'data-type': 'var_time', 'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 				} );
 				const innerText = viewWriter.createText( '{' + dataType + ':' + variableId + ':' + Util.decodeHTML( textcontent ) + '}' );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( VariableEditing.viewmode === 'coloredview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'variable', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'var_time', 'data-language': dataLanguage
+					class: 'variable', 'data-id': variableId, 'data-viewmode': 'coloredview',
+					'data-type': 'var_time', 'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( VariableEditing.viewmode === 'simpleview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_time', 'data-language': dataLanguage
+					class: 'variable variable_simpleview', 'data-id': variableId, 'data-viewmode': 'simpleview',
+					'data-type': 'var_time', 'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
@@ -314,23 +313,31 @@ export default class VariableEditing extends Plugin {
 			const dataLanguage = modelItem.getAttribute( 'data-language' )
 				? modelItem.getAttribute( 'data-language' )
 				: 'en';
+			const suggestionNewValue = ( modelItem.getAttribute( 'data-suggestion-new-value' )
+			&& modelItem.getAttribute( 'data-suggestion-new-value' ) != '' )
+				? modelItem.getAttribute( 'data-suggestion-new-value' )
+				: '';
+			console.log( '#### EDITING suggestionNewValue:', suggestionNewValue );
 			const textcontent = modelItem.getAttribute( 'data-content' );
 			let varView;
 			if ( VariableEditing.viewmode === 'infoview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'variable', 'data-id': variableId, 'data-viewmode': 'infoview', 'data-type': 'var_str', 'data-language': dataLanguage
+					class: 'variable', 'data-id': variableId, 'data-viewmode': 'infoview',
+					'data-type': 'var_str', 'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 				} );
 				const innerText = viewWriter.createText( '{' + dataType + ':' + variableId + ':' + Util.decodeHTML( textcontent ) + '}' );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( VariableEditing.viewmode === 'coloredview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: 'variable', 'data-id': variableId, 'data-viewmode': 'coloredview', 'data-type': 'var_str', 'data-language': dataLanguage
+					class: 'variable', 'data-id': variableId, 'data-viewmode': 'coloredview',
+					'data-type': 'var_str', 'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );
 			} else if ( VariableEditing.viewmode === 'simpleview' ) {
 				varView = viewWriter.createContainerElement( 'span', {
-					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'var_str', 'data-language': dataLanguage
+					class: 'variable variable_simpleview', 'data-id': variableId, 'data-viewmode': 'simpleview',
+					'data-type': 'var_str', 'data-language': dataLanguage, 'data-suggestion-new-value': suggestionNewValue
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );
 				viewWriter.insert( viewWriter.createPositionAt( varView, 0 ), innerText );

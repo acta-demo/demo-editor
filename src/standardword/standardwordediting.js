@@ -150,7 +150,7 @@ export default class StandardWordEditing extends Plugin {
 				viewWriter.insert( viewWriter.createPositionAt( strView, 0 ), innerText );
 			} else if ( StandardWordEditing.viewmode === 'simpleview' ) {
 				strView = viewWriter.createContainerElement( 'span', {
-					class: '', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'str',
+					class: 'standardword standardword_simpleview', 'data-id': variableId, 'data-viewmode': 'simpleview', 'data-type': 'str',
 					'draggable': 'true', 'ondragstart': 'ondragstart($event)', 'data-language': dataLanguage
 				} );
 				const innerText = viewWriter.createText( Util.decodeHTML( textcontent ) );

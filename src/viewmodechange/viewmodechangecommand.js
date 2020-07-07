@@ -43,7 +43,7 @@ export default class ViewModeChangeCommand extends Command {
 							console.log( '#### ViewModeChangeCommand str' );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
 							// inner_element._setAttribute('data-viewmode', value);
-							this.handlespanStr( inner_element, value );
+							this.handlespanStr( inner_element, value, viewWriter );
 						} else if ( inner_element.name == 'div' ) { // Snippets
 							console.log( '#### ViewModeChangeCommand div' );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
@@ -51,17 +51,17 @@ export default class ViewModeChangeCommand extends Command {
 						} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ) === 'var_sp' ) {
 							console.log( '#### ViewModeChangeCommand var_ inner_element:', inner_element );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
-							this.handlespanVarSp( inner_element, value );
+							this.handlespanVarSp( inner_element, value, viewWriter );
 						} else if ( inner_element.name == 'span'
 							&& inner_element.getAttribute( 'data-type' )
 							&& inner_element.getAttribute( 'data-type' ).startsWith( 'var_' ) ) {
 							console.log( '#### ViewModeChangeCommand var_ inner_element:', inner_element );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
-							this.handlespanVar( inner_element, value );
+							this.handlespanVar( inner_element, value, viewWriter );
 						} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ) === 'title' ) {
 							console.log( '#### ViewModeChangeCommand var_ inner_element:', inner_element );
 							viewWriter.setAttribute( 'data-viewmode', value, inner_element );
-							this.handlespanTitle( inner_element, value );
+							this.handlespanTitle( inner_element, value, viewWriter );
 						} else if ( inner_element.name == 'table' ) {
 							console.log( '#### ViewModeChangeCommand table inner_element:', inner_element );
 							// viewWriter.setAttribute( 'data-viewmode', value, inner_element );
@@ -99,7 +99,7 @@ export default class ViewModeChangeCommand extends Command {
 								console.log( '#### handleTable str' );
 								viewWriter.setAttribute( 'data-viewmode', value, inner_element );
 								// inner_element._setAttribute('data-viewmode', value);
-								this.handlespanStr( inner_element, value );
+								this.handlespanStr( inner_element, value, viewWriter );
 							} else if ( inner_element.name == 'div' ) { // Snippets
 								console.log( '#### handleTable div' );
 								viewWriter.setAttribute( 'data-viewmode', value, inner_element );
@@ -107,18 +107,18 @@ export default class ViewModeChangeCommand extends Command {
 							} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' ) === 'var_sp' ) {
 								console.log( '#### handleTable var_ inner_element:', inner_element );
 								viewWriter.setAttribute( 'data-viewmode', value, inner_element );
-								this.handlespanVarSp( inner_element, value );
+								this.handlespanVarSp( inner_element, value, viewWriter );
 							} else if ( inner_element.name == 'span'
 								&& inner_element.getAttribute( 'data-type' )
 								&& inner_element.getAttribute( 'data-type' ).startsWith( 'var_' ) ) {
 								console.log( '#### handleTable var_ inner_element:', inner_element );
 								viewWriter.setAttribute( 'data-viewmode', value, inner_element );
-								this.handlespanVar( inner_element, value );
+								this.handlespanVar( inner_element, value, viewWriter );
 							} else if ( inner_element.name == 'span' && inner_element.getAttribute( 'data-type' )
 								&& inner_element.getAttribute( 'data-type' ) === 'title' ) {
 								console.log( '#### handleTable var_ inner_element:', inner_element );
 								viewWriter.setAttribute( 'data-viewmode', value, inner_element );
-								this.handlespanTitle( inner_element, value );
+								this.handlespanTitle( inner_element, value, viewWriter );
 							}
 						}
 					}
@@ -127,33 +127,36 @@ export default class ViewModeChangeCommand extends Command {
 		}
 	}
 
-	handlespanStr( propertyName, viewmode ) {
+	handlespanStr( propertyName, viewmode, viewWriter ) {
 		const _data = propertyName.getChild( 0 )._textData;
 		const _class = propertyName.getAttribute( 'class' );
 		if ( viewmode ) {
 			if ( viewmode === 'coloredview' ) {
 				const _dataSimple = _data.replace( /(^{str:[^:]*:)|(}$)/g, '' );
 				propertyName.getChild( 0 )._data = _dataSimple;
-				if ( !_class.includes( 'standardword' ) ) {
-					propertyName._setAttribute( 'class', 'standardword ' + _class );
+				if ( _class.includes( 'standardword_simpleview', propertyName ) ) {
+					viewWriter.removeClass( 'standardword_simpleview', propertyName );
 				}
 			} else if ( viewmode === 'infoview' && !/(^{str:[^:]*:)|(}$)/g.test( propertyName.getChild( 0 )._data ) ) {
 				const _id = propertyName.getAttribute( 'data-id' );
 				propertyName.getChild( 0 )._data = '{str:' + _id + ':' + propertyName.getChild( 0 )._data + '}';
-				if ( !_class.includes( 'standardword' ) ) {
-					propertyName._setAttribute( 'class', 'standardword ' + _class );
+				if ( _class.includes( 'standardword_simpleview', propertyName ) ) {
+					viewWriter.removeClass( 'standardword_simpleview', propertyName );
 				}
 			} else if ( viewmode === 'simpleview' && /standardword/g.test( propertyName.getAttribute( 'class' ) ) ) {
 				const _dataSimple = _data.replace( /(^{str:[^:]*:)|(}$)/g, '' );
 				propertyName.getChild( 0 )._data = _dataSimple;
-				const _class = propertyName.getAttribute( 'class' ).replace( /standardword/g, '' ).replace( /\s\s+/g, ' ' ).trim();
-				propertyName._setAttribute( 'class', _class );
+				if ( !_class.includes( 'standardword_simpleview', propertyName ) ) {
+					viewWriter.addClass( 'standardword_simpleview', propertyName );
+				}
+				// const _class = propertyName.getAttribute( 'class' ).replace( /standardword/g, '' ).replace( /\s\s+/g, ' ' ).trim();
+				// propertyName._setAttribute( 'class', _class );
 			}
 		}
 
 	}
 
-	handlespanVar( propertyName, viewmode ) {
+	handlespanVar( propertyName, viewmode, viewWriter ) {
 		const _data = propertyName.getChild( 0 )._textData;
 		const _class = propertyName.getAttribute( 'class' );
 		const dataType = propertyName.getAttribute( 'data-type' );
@@ -163,8 +166,8 @@ export default class ViewModeChangeCommand extends Command {
 					? _data.replace( /(^({var_date:[^:]*:)|({var_time:[^:]*:)|({var_str:[^:]*:))|(}$)/g, '' ).replace( /['"]+/g, '' )
 					: _data.replace( /(^({var_date:[^:]*:)|({var_time:[^:]*:)|({var_str:[^:]*:))|(}$)/g, '' );
 				propertyName.getChild( 0 )._data = _dataSimple;
-				if ( !_class.includes( 'variable' ) ) {
-					propertyName._setAttribute( 'class', 'variable ' + _class );
+				if ( _class.includes( 'variable_simpleview' ) ) {
+					viewWriter.removeClass( 'variable_simpleview', propertyName );
 				}
 			} else if ( viewmode === 'infoview' && !/(^({var_date:[^:]*:)|({var_time:[^:]*:)|({var_str:[^:]*:))|(}$)/g.test( propertyName.getChild( 0 )._data ) ) {
 				const _id = propertyName.getAttribute( 'data-id' );
@@ -173,68 +176,71 @@ export default class ViewModeChangeCommand extends Command {
 				} else {
 					propertyName.getChild( 0 )._data = '{' + dataType + ':' + _id + ':' + propertyName.getChild( 0 )._data + '}';
 				}
-				if ( !_class.includes( 'variable' ) ) {
-					propertyName._setAttribute( 'class', 'variable ' + _class );
+				if ( _class.includes( 'variable_simpleview' ) ) {
+					viewWriter.removeClass( 'variable_simpleview', propertyName );
 				}
 			} else if ( viewmode === 'simpleview' && /variable/g.test( propertyName.getAttribute( 'class' ) ) ) {
 				const _dataSimple = ( dataType === 'var_time' )
 					? _data.replace( /(^({var_date:[^:]*:)|({var_time:[^:]*:)|({var_str:[^:]*:))|(}$)/g, '' ).replace( /['"]+/g, '' )
 					: _data.replace( /(^({var_date:[^:]*:)|({var_time:[^:]*:)|({var_str:[^:]*:))|(}$)/g, '' );
 				propertyName.getChild( 0 )._data = _dataSimple;
-				const _class = propertyName.getAttribute( 'class' ).replace( /variable/g, '' ).replace( /\s\s+/g, ' ' ).trim();
-				propertyName._setAttribute( 'class', _class );
+				if ( !_class.includes( 'variable_simpleview' ) ) {
+					viewWriter.addClass( 'variable_simpleview', propertyName );
+				}
 			}
 		}
 
 	}
 
-	handlespanVarSp( propertyName, viewmode ) {
+	handlespanVarSp( propertyName, viewmode, viewWriter ) {
 		const _data = propertyName.getChild( 0 )._textData;
 		const _class = propertyName.getAttribute( 'class' );
 		if ( viewmode ) {
 			if ( viewmode === 'coloredview' ) {
 				const _dataSimple = _data.replace( /(^{var_sp:[^:]*:)|(}$)/g, '' );
 				propertyName.getChild( 0 )._data = _dataSimple;
-				if ( !_class.includes( 'lsp' ) ) {
-					propertyName._setAttribute( 'class', 'lsp ' + _class );
+				if ( _class.includes( 'lsp_simpleview' ) ) {
+					viewWriter.removeClass( 'lsp_simpleview', propertyName );
 				}
 			} else if ( viewmode === 'infoview' && !/(^{var_sp:[^:]*:)|(}$)/g.test( propertyName.getChild( 0 )._data ) ) {
 				const _id = propertyName.getAttribute( 'data-id' );
 				propertyName.getChild( 0 )._data = '{var_sp:' + _id + ':' + propertyName.getChild( 0 )._data + '}';
-				if ( !_class.includes( 'lsp' ) ) {
-					propertyName._setAttribute( 'class', 'lsp ' + _class );
+				if ( _class.includes( 'lsp_simpleview' ) ) {
+					viewWriter.removeClass( 'lsp_simpleview', propertyName );
 				}
 			} else if ( viewmode === 'simpleview' && /lsp/g.test( propertyName.getAttribute( 'class' ) ) ) {
 				const _dataSimple = _data.replace( /(^{var_sp:[^:]*:)|(}$)/g, '' );
 				propertyName.getChild( 0 )._data = _dataSimple;
-				const _class = propertyName.getAttribute( 'class' ).replace( /lsp/g, '' ).replace( /\s\s+/g, ' ' ).trim();
-				propertyName._setAttribute( 'class', _class );
+				if ( !_class.includes( 'lsp_simpleview' ) ) {
+					viewWriter.addClass( 'lsp_simpleview', propertyName );
+				}
 			}
 		}
 
 	}
 
-	handlespanTitle( propertyName, viewmode ) {
+	handlespanTitle( propertyName, viewmode, viewWriter ) {
 		const _data = propertyName.getChild( 0 )._textData;
 		const _class = propertyName.getAttribute( 'class' );
 		if ( viewmode ) {
 			if ( viewmode === 'coloredview' ) {
 				const _dataSimple = _data.replace( /(^{title:[^:]*:)|(}$)/g, '' );
 				propertyName.getChild( 0 )._data = _dataSimple;
-				if ( !_class.includes( 'title' ) ) {
-					propertyName._setAttribute( 'class', 'title ' + _class );
+				if ( _class.includes( 'title_simpleview' ) ) {
+					viewWriter.removeClass( 'title_simpleview', propertyName );
 				}
 			} else if ( viewmode === 'infoview' && !/(^{title:[^:]*:)|(}$)/g.test( propertyName.getChild( 0 )._data ) ) {
 				const _id = propertyName.getAttribute( 'data-id' );
 				propertyName.getChild( 0 )._data = '{title:' + _id + ':' + propertyName.getChild( 0 )._data + '}';
-				if ( !_class.includes( 'title' ) ) {
-					propertyName._setAttribute( 'class', 'title ' + _class );
+				if ( _class.includes( 'title_simpleview' ) ) {
+					viewWriter.removeClass( 'title_simpleview', propertyName );
 				}
 			} else if ( viewmode === 'simpleview' && /title/g.test( propertyName.getAttribute( 'class' ) ) ) {
 				const _dataSimple = _data.replace( /(^{title:[^:]*:)|(}$)/g, '' );
 				propertyName.getChild( 0 )._data = _dataSimple;
-				const _class = propertyName.getAttribute( 'class' ).replace( /title/g, '' ).replace( /\s\s+/g, ' ' ).trim();
-				propertyName._setAttribute( 'class', _class );
+				if ( !_class.includes( 'title_simpleview' ) ) {
+					viewWriter.addClass( 'title_simpleview', propertyName );
+				}
 			}
 		}
 
@@ -244,29 +250,27 @@ export default class ViewModeChangeCommand extends Command {
 		console.log( '#### handlediv divelement:', divelement );
 		console.log( '#### handlediv viewmode:', viewmode );
 		const _id = divelement.getAttribute( 'data-id' );
-		let _class = divelement.getAttribute( 'class' );
+		const _class = divelement.getAttribute( 'class' );
 		if ( viewmode === 'coloredview' && divelement.getAttribute( 'data-type' ) === 'snp' ) {
 			console.log( '#### handlediv COLOREDVIEW' );
-			_class = _class.replace( 'snippet_simpleview', '' );
-			_class = ( _class.includes( 'snipet' ) ) ? _class : 'snippet ' + _class;
-			_class = _class.replace( /\s\s+/g, ' ' );
-			viewWriter.setAttribute( 'class', _class, divelement );
+			if ( _class.includes( 'snippet_simpleview' ) ) {
+				viewWriter.removeClass( 'snippet_simpleview', divelement );
+			}
 			viewWriter.setAttribute( 'data-before', '', divelement );
 			viewWriter.setAttribute( 'data-after', '', divelement );
 		} else if ( viewmode === 'simpleview' && divelement.getAttribute( 'data-type' ) === 'snp' ) {
 			console.log( '#### handlediv SIMPLEVIEW' );
-			_class = _class.replace( 'snippet', '' );
-			_class = ( _class.includes( 'snippet_simpleview' ) ) ? _class : 'snippet_simpleview ' + _class;
-			_class = _class.replace( /\s\s+/g, ' ' );
-			viewWriter.setAttribute( 'class', _class, divelement );
+			// _class = _class.replace( 'snippet', '' );
+			if ( !_class.includes( 'snippet_simpleview' ) ) {
+				viewWriter.addClass( 'snippet_simpleview', divelement );
+			}
 			viewWriter.setAttribute( 'data-before', '', divelement );
 			viewWriter.setAttribute( 'data-after', '', divelement );
 		} else if ( viewmode === 'infoview' && divelement.getAttribute( 'data-type' ) === 'snp' ) {
 			console.log( '#### handlediv INFOVIEW' );
-			_class = _class.replace( 'snippet_simpleview', '' );
-			_class = ( _class.includes( 'snipet' ) ) ? _class : 'snippet ' + _class;
-			_class = _class.replace( /\s\s+/g, ' ' );
-			viewWriter.setAttribute( 'class', _class, divelement );
+			if ( _class.includes( 'snippet_simpleview' ) ) {
+				viewWriter.removeClass( 'snippet_simpleview', divelement );
+			}
 			viewWriter.setAttribute( 'data-before', '{snp:' + _id + ':', divelement );
 			viewWriter.setAttribute( 'data-after', '', divelement );
 		}
@@ -281,21 +285,29 @@ export default class ViewModeChangeCommand extends Command {
 				viewWriter.removeAttribute( 'style', element );
 			} else if ( element instanceof Element && element.name === 'span' && element.getAttribute( 'data-type' ) === 'str' ) {
 				console.log( '#### element inside div:', element );
-				this.handlespanStr( element, viewmode );
+				this.handlespanStr( element, viewmode, viewWriter );
 
 			} else if ( element instanceof Element && element.name === 'span' && element.getAttribute( 'data-type' ) === 'var_sp' ) {
 				console.log( '#### element inside div:', element );
-				this.handlespanVarSp( element, viewmode );
+				this.handlespanVarSp( element, viewmode, viewWriter );
 
 			} else if ( element instanceof Element && element.name === 'span'
 				&& element.getAttribute( 'data-type' )
 				&& element.getAttribute( 'data-type' ).startsWith( 'var_' ) ) {
 				console.log( '#### element inside div:', element );
-				this.handlespanVar( element, viewmode );
+				this.handlespanVar( element, viewmode, viewWriter );
 
 			} else if ( element instanceof Element && element.name === 'span' && element.getAttribute( 'data-type' ) === 'title' ) {
 				console.log( '#### element inside div:', element );
-				this.handlespanTitle( element, viewmode );
+				this.handlespanTitle( element, viewmode, viewWriter );
+
+			} else if ( element instanceof Element && element.name === 'span' && element.getAttribute( 'data-type' ) === 'right-bracket' ) {
+				console.log( '#### element inside div:', element );
+				if ( viewmode === 'infoview' ) {
+					viewWriter.setAttribute( 'style', 'display:inline', element );
+				} else {
+					viewWriter.setAttribute( 'style', 'display:none', element );
+				}
 
 			}
 
